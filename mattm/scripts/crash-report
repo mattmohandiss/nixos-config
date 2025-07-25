@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+
+# NixOS System Crash Diagnostic Report Generator
+# This script collects comprehensive system information after a crash
+# for analysis by LLMs or system administrators
+
+set -euo pipefail
+
+# Configuration
+REPORT_DIR="/tmp/crash-reports"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+REPORT_FILE="$REPORT_DIR/crash_report_$TIMESTAMP.txt"
+
+# Create report directory
+mkdir -p "$REPORT_DIR"
+
+# Function to add section headers
+add_section() {
+    echo "" >> "$REPORT_FILE"
+    echo "========================================" >> "$REPORT_FILE"
+    echo "$1" >> "$REPORT_FILE"
+    echo "========================================" >> "$REPORT_FILE"
+    echo "" >> "$REPORT_FILE"
+}
+
+# Function to run command and capture output safely
+run_cmd() {
+    local cmd="$1"
+    local description="$2"
+    
+    echo "Running: $description" >&2
+    echo "Command: $cmd" >> "$REPORT_FILE"
+    echo "Output:" >> "$REPORT_FILE"
+    
+    if eval "$cmd" >> "$REPORT_FILE" 2>&1; then
+        echo "✓ $description completed" >&2
+    else
+        echo "✗ $description failed (exit code: $?)" >> "$REPORT_FILE"
+        echo "✗ $description failed" >&2
+    fi
+    echo "" >> "$REPORT_FILE"
+}
+
+# Start report
+echo "NixOS System Crash Diagnostic Report" > "$REPORT_FILE"
+echo "Generated: $(date)" >> "$REPORT_FILE"
+echo "Hostname: $(hostname)" >> "$REPORT_FILE"
+echo "User: $(whoami)" >> "$REPORT_FILE"
+
+# System Information
+add_section "SYSTEM INFORMATION"
+run_cmd "uname -a" "Kernel information"
+run_cmd "uptime" "System uptime"
+run_cmd "free -h" "Memory usage"
+run_cmd "df -h" "Disk usage"
+run_cmd "lscpu" "CPU information"
+
+# Hardware Information
+add_section "HARDWARE INFORMATION"
+run_cmd "lspci -v" "PCI devices"
+run_cmd "lsusb" "USB devices"
+run_cmd "sudo dmidecode -t system" "System DMI information"
+
+# Temperature and Sensors
+add_section "HARDWARE SENSORS"
+if command -v sensors >/dev/null 2>&1; then
+    run_cmd "sensors" "Hardware sensors"
+else
+    echo "sensors command not available, using nix-shell" >> "$REPORT_FILE"
+    run_cmd "nix-shell -p lm_sensors --run 'sensors'" "Hardware sensors (via nix-shell)"
+fi
+
+# Storage Health
+add_section "STORAGE HEALTH"
+if command -v smartctl >/dev/null 2>&1; then
+    run_cmd "sudo smartctl -a /dev/nvme0n1" "NVMe drive health"
+else
+    echo "smartctl not available, using nix-shell" >> "$REPORT_FILE"
+    run_cmd "nix-shell -p smartmontools --run 'sudo smartctl -a /dev/nvme0n1'" "NVMe drive health (via nix-shell)"
+fi
+
+# Power Management
+add_section "POWER MANAGEMENT"
+if command -v acpi >/dev/null 2>&1; then
+    run_cmd "acpi -V" "ACPI information"
+else
+    echo "acpi command not available, using nix-shell" >> "$REPORT_FILE"
+    run_cmd "nix-shell -p acpi --run 'acpi -V'" "ACPI information (via nix-shell)"
+fi
+
+# Kernel Messages and Errors
+add_section "KERNEL MESSAGES"
+run_cmd "sudo dmesg -T | tail -100" "Recent kernel messages"
+run_cmd "sudo dmesg | grep -i -E '(error|fail|panic|oops|segfault|killed|oom|thermal|temperature|overheat|hardware|mce|corrected|uncorrected)' | tail -20" "Kernel error messages"
+
+# System Logs
+add_section "SYSTEM LOGS - CURRENT BOOT"
+run_cmd "journalctl --no-pager -b 0 --since '10 minutes ago'" "Recent system logs"
+run_cmd "journalctl --no-pager -b 0 | grep -i -E '(error|fail|panic|crash|segfault|killed)' | tail -20" "Current boot error logs"
+
+add_section "SYSTEM LOGS - PREVIOUS BOOT"
+run_cmd "journalctl --no-pager -b -1 | tail -100" "Previous boot final logs"
+run_cmd "journalctl --no-pager -b -1 | grep -i -E '(error|fail|panic|crash|segfault|killed)' | tail -20" "Previous boot error logs"
+
+# System Configuration
+add_section "NIXOS CONFIGURATION"
+run_cmd "readlink /nix/var/nix/profiles/system" "Current system generation"
+run_cmd "ls -la /nix/var/nix/profiles/system-{185..195}-link 2>/dev/null || ls -la /nix/var/nix/profiles/system-*-link | tail -10" "Recent system generations"
+run_cmd "cat /proc/cmdline" "Kernel command line"
+
+# Process Information
+add_section "PROCESS INFORMATION"
+run_cmd "ps aux --sort=-%mem | head -20" "Top memory-consuming processes"
+run_cmd "ps aux --sort=-%cpu | head -20" "Top CPU-consuming processes"
+
+# Network Information
+add_section "NETWORK INFORMATION"
+run_cmd "ip addr show" "Network interfaces"
+run_cmd "systemctl status NetworkManager" "NetworkManager status"
+
+# Graphics Information
+add_section "GRAPHICS INFORMATION"
+run_cmd "lspci | grep -i vga" "Graphics hardware"
+run_cmd "glxinfo | head -20 2>/dev/null || echo 'glxinfo not available'" "OpenGL information"
+
+# Wayland/Niri Information
+add_section "WAYLAND/NIRI INFORMATION"
+run_cmd "echo \$XDG_SESSION_TYPE" "Session type"
+run_cmd "echo \$WAYLAND_DISPLAY" "Wayland display"
+run_cmd "pgrep -f niri || echo 'Niri not running'" "Niri process check"
+
+# System Services
+add_section "SYSTEM SERVICES"
+run_cmd "systemctl --failed" "Failed services"
+run_cmd "systemctl list-units --state=error" "Services in error state"
+
+# File System Information
+add_section "FILESYSTEM INFORMATION"
+run_cmd "mount | grep -E '(ext4|btrfs|xfs|zfs)'" "Mounted filesystems"
+run_cmd "sudo tune2fs -l /dev/mapper/luks-* 2>/dev/null | grep -E '(Filesystem state|Mount count|Maximum mount count|Last checked|Check interval)' || echo 'ext4 filesystem info not available'" "Filesystem health"
+
+# Crash Dump Information
+add_section "CRASH DUMP INFORMATION"
+run_cmd "ls -la /var/crash/ 2>/dev/null || echo 'No crash dumps found'" "Available crash dumps"
+run_cmd "systemctl status kdump.service 2>/dev/null || echo 'kdump service not available'" "Crash dump service status"
+
+# User Application Crash Information
+add_section "USER APPLICATION CRASHES"
+run_cmd "ls -la /var/lib/systemd/coredump/ 2>/dev/null || echo 'No system coredumps found'" "System coredumps"
+run_cmd "ls -la /tmp/core.* 2>/dev/null || echo 'No core dumps in /tmp'" "Core dumps in /tmp"
+run_cmd "find /home -name 'core.*' -mtime -1 2>/dev/null || echo 'No recent user core dumps'" "Recent user core dumps"
+
+# User Session Logs
+add_section "USER SESSION LOGS"
+run_cmd "journalctl --user --no-pager -b 0 | tail -50 2>/dev/null || echo 'No user journal available'" "User session journal"
+run_cmd "systemctl --user --failed 2>/dev/null || echo 'No failed user services'" "Failed user services"
+run_cmd "systemctl --user list-units --state=error 2>/dev/null || echo 'No user services in error state'" "User services in error state"
+
+# Application-Specific Crash Logs
+add_section "APPLICATION CRASH LOGS"
+run_cmd "ls -la ~/.config/Code/logs/ 2>/dev/null || echo 'No VSCode logs found'" "VSCode crash logs"
+run_cmd "find ~/.mozilla -name 'crashes' -type d -exec ls -la {} \\; 2>/dev/null || echo 'No Firefox/Zen crash reports'" "Firefox/Zen crash reports"
+run_cmd "ls -la ~/.cache/niri/ 2>/dev/null || echo 'No Niri cache/logs found'" "Niri logs and cache"
+run_cmd "ls -la ~/.local/share/applications/ 2>/dev/null | head -10 || echo 'No user applications info'" "User applications"
+
+# Wayland/Graphics Debugging
+add_section "WAYLAND/GRAPHICS DEBUGGING"
+run_cmd "echo \"WAYLAND_DISPLAY: \$WAYLAND_DISPLAY\"" "Wayland display variable"
+run_cmd "echo \"XDG_SESSION_TYPE: \$XDG_SESSION_TYPE\"" "Session type variable"
+run_cmd "journalctl --no-pager -b 0 | grep -i wayland | tail -10 || echo 'No Wayland messages in journal'" "Wayland-related journal entries"
+run_cmd "journalctl --no-pager -b 0 | grep -i 'gpu\\|drm\\|i915' | tail -10 || echo 'No GPU messages in journal'" "GPU/Graphics messages"
+run_cmd "ps aux | grep -E '(niri|waybar|fuzzel)' | grep -v grep || echo 'No Wayland processes running'" "Wayland compositor processes"
+
+# Recent Application Crashes from Journal
+add_section "RECENT APPLICATION CRASHES"
+run_cmd "journalctl --no-pager -b 0 | grep -i -E '(segfault|sigsegv|sigabrt|crashed|core dumped)' | tail -20 || echo 'No recent application crashes'" "Recent application crashes"
+run_cmd "journalctl --no-pager -b -1 | grep -i -E '(segfault|sigsegv|sigabrt|crashed|core dumped)' | tail -10 || echo 'No application crashes in previous boot'" "Previous boot application crashes"
+
+# Hardware Error Logs
+add_section "HARDWARE ERROR LOGS"
+run_cmd "sudo dmesg | grep -i bert || echo 'No BERT errors found'" "BERT hardware errors"
+run_cmd "sudo dmesg | grep -i mce || echo 'No MCE errors found'" "Machine Check Exception errors"
+run_cmd "sudo journalctl -b 0 | grep -i 'hardware error' || echo 'No hardware errors in journal'" "Hardware errors in journal"
+
+# Final Summary
+add_section "REPORT SUMMARY"
+echo "Report generated at: $(date)" >> "$REPORT_FILE"
+echo "Total report size: $(wc -l < "$REPORT_FILE") lines" >> "$REPORT_FILE"
+echo "Report location: $REPORT_FILE" >> "$REPORT_FILE"
+
+# Completion message
+echo ""
+echo "=========================================="
+echo "Crash diagnostic report completed!"
+echo "=========================================="
+echo "Report saved to: $REPORT_FILE"
+echo "Report size: $(du -h "$REPORT_FILE" | cut -f1)"
+echo ""
+echo "You can now:"
+echo "1. Review the report: less '$REPORT_FILE'"
+echo "2. Copy to clipboard: cat '$REPORT_FILE' | wl-copy"
+echo "3. Share with support or feed to an LLM for analysis"
+echo ""
+echo "The report contains comprehensive system information"
+echo "including hardware status, logs, and configuration details."

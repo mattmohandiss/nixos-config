@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+# Generate new or switch existing risograph wallpapers
+
+set -euo pipefail
+
+WALLPAPER_DIR="/etc/nixos/mattm/wallpapers"
+API_URL="https://api.openai.com/v1/images/generations"
+MAX_WALLPAPERS=10
+PROMPT="A vibrant risograph-style landscape, with bold halftone textures and limited colors. Stylized with dramatic lighting and grainy print textures. High contrast, retro risograph aesthetic, suitable for a desktop wallpaper."
+
+notify() {
+    notify-send "Wallpaper" "$1" 2>/dev/null || true
+}
+
+generate_new() {
+    mkdir -p "$WALLPAPER_DIR"
+    
+    # Get API key and generate filename
+    API_KEY=$(secret-tool lookup service openai username dalle3)
+    TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
+    WALLPAPER_FILE="$WALLPAPER_DIR/dalle_$TIMESTAMP.jpg"
+    
+    # Start notification and capture its ID
+    id=$(notify-send --print-id "Wallpaper" "Generating new wallpaper..." 2>/dev/null || echo "")
+    
+    # Call DALL-E 3 API and download
+    curl -s -X POST "$API_URL" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $API_KEY" \
+        -d "{
+            \"model\": \"dall-e-3\",
+            \"prompt\": \"$PROMPT\",
+            \"n\": 1,
+            \"size\": \"1792x1024\",
+            \"quality\": \"hd\",
+            \"response_format\": \"url\"
+        }" | jq -r '.data[0].url' | xargs curl -s -o "$WALLPAPER_FILE"
+    
+    # Post-process: upscale to 4K and enhance
+    magick "$WALLPAPER_FILE" -resize 3840x2160^ -gravity center -extent 3840x2160 \
+        -contrast-stretch 2%x1% -modulate 100,115,100 -unsharp 0x1+1.0+0.05 \
+        "$WALLPAPER_FILE"
+    
+    # Set as current and apply
+    ln -sf "$WALLPAPER_FILE" "$WALLPAPER_DIR/current.jpg"
+    swww img "$WALLPAPER_FILE" --resize crop --filter Lanczos3 \
+        --transition-type wipe --transition-duration 1 --transition-fps 60
+    
+    # Cleanup old wallpapers
+    find "$WALLPAPER_DIR" -name "dalle_*.jpg" -type f -printf '%T@ %p\n' | \
+        sort -rn | tail -n +$((MAX_WALLPAPERS + 1)) | cut -d' ' -f2- | xargs -r rm -f
+    
+    # Replace the original notification with success message that auto-expires
+    if [ -n "$id" ]; then
+        notify-send --replace-id=$id --expire-time=3000 "Wallpaper" "New risograph landscape wallpaper generated!" 2>/dev/null || true
+    fi
+}
+
+switch_existing() {
+    # Find all wallpaper files (excluding current.jpg symlink)
+    mapfile -t WALLPAPERS < <(find "$WALLPAPER_DIR" -name "*.jpg" -o -name "*.png" | grep -v "current.jpg")
+    
+    if [ ${#WALLPAPERS[@]} -eq 0 ]; then
+        notify "No wallpapers found. Generate one first with 'wallpaper new'"
+        exit 1
+    fi
+    
+    # Select random wallpaper
+    SELECTED_WALLPAPER="${WALLPAPERS[$RANDOM % ${#WALLPAPERS[@]}]}"
+    
+    # Update current wallpaper and apply
+    ln -sf "$SELECTED_WALLPAPER" "$WALLPAPER_DIR/current.jpg"
+    swww img "$SELECTED_WALLPAPER" --resize crop --filter Lanczos3 \
+        --transition-type fade --transition-duration 0.5 --transition-fps 60
+}
+
+# Main logic
+if [ "${1:-}" = "new" ]; then
+    generate_new
+else
+    switch_existing
+fi

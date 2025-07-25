@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# magnet-download - Download torrents via magnet links with dynamic tracker lists
+# Usage: magnet-download <magnet-link>
+
+set -euo pipefail
+
+MAGNET_LINK="$1"
+TRACKER_CACHE="/tmp/aria2c-trackers.txt"
+TRACKER_URL="https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt"
+
+# Download fresh tracker list if cache is older than 24 hours or doesn't exist
+if [[ ! -f "$TRACKER_CACHE" ]] || [[ $(find "$TRACKER_CACHE" -mtime +1 2>/dev/null) ]]; then
+    echo "Updating tracker list..."
+    if curl -s "$TRACKER_URL" | grep -v '^$' > "$TRACKER_CACHE.tmp"; then
+        mv "$TRACKER_CACHE.tmp" "$TRACKER_CACHE"
+        echo "Tracker list updated successfully."
+    else
+        echo "Failed to update tracker list, using cached version if available."
+        rm -f "$TRACKER_CACHE.tmp"
+    fi
+fi
+
+# Convert newline-separated trackers to comma-separated format if cache exists
+if [[ -f "$TRACKER_CACHE" ]]; then
+    TRACKERS=$(tr '\n' ',' < "$TRACKER_CACHE" | sed 's/,$//')
+    kitty --hold --directory="/srv/media" aria2c --dir="/srv/media" --bt-tracker="$TRACKERS" "$MAGNET_LINK"
+else
+    echo "No tracker list available, downloading without additional trackers."
+    kitty --hold --directory="/srv/media" aria2c --dir="/srv/media" "$MAGNET_LINK"
+fi
