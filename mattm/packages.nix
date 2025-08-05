@@ -37,5 +37,15 @@
     # GPG for Git commit signing
     gnupg
     pinentry-gtk2
+
+    godot
+    blender
+
+    bat
+    btop
+    eza
+
+    grim
+    slurp
   ];
 }

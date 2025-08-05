@@ -83,6 +83,8 @@ in
         # Wallpaper management
         "Mod+W".action = actions.spawn ["bash" "/etc/nixos/mattm/scripts/wallpaper"];
         "Mod+Shift+W".action = actions.spawn ["bash" "/etc/nixos/mattm/scripts/wallpaper" "new"];
+        "Mod+S".action = actions.spawn ["sh" "-c" "grim -g \"$(slurp)\" - | wl-copy --type image/png"];
+
       };
     };
   };
