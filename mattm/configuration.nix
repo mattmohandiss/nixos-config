@@ -21,6 +21,7 @@
     ./applications/kitty.nix
     ./applications/media.nix
     ./applications/zen-browser.nix
+    ./applications/neovim.nix
   ];
 
   # Home Manager core configuration

@@ -2,7 +2,6 @@
 
 {
   home.packages = with pkgs; [
-    neovim
     waybar
     fuzzel
     wl-clipboard
