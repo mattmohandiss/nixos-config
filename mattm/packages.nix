@@ -20,6 +20,11 @@
     aria2 # Multi-protocol download utility with torrent support
     mpv # Media player
     kdePackages.filelight
+    nautilus
+    gimp
+    microsoft-edge
+    love
+    zoom-us
 
     # Nix development tools
     nixd # Nix language server
