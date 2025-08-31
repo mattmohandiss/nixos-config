@@ -18,8 +18,64 @@
     };
   };
 
-  # Create media directory with proper permissions
+  # Enhanced logging and crash analysis services
+  services.journald = {
+    extraConfig = ''
+      Storage=persistent
+      MaxRetentionSec=30d
+      MaxFileSec=1week
+      Compress=yes
+      SplitMode=uid
+      RateLimitInterval=30s
+      RateLimitBurst=10000
+    '';
+  };
+
+  # System coredump collection
+  systemd.coredump = {
+    enable = true;
+    extraConfig = ''
+      Storage=external
+      Compress=yes
+      ProcessSizeMax=2G
+      ExternalSizeMax=2G
+      MaxUse=5G
+    '';
+  };
+
+  # System monitoring and hardware health
+  environment.systemPackages = with pkgs; [
+    # Hardware monitoring
+    lm_sensors
+    smartmontools
+    acpi
+    powertop
+    iotop
+    
+    # System analysis tools
+    strace
+    ltrace
+    gdb
+    binutils
+    
+    # Performance monitoring
+    perf-tools
+    sysstat
+    
+    # Thermal monitoring
+    stress-ng
+    
+    # Memory testing
+    memtester
+  ];
+
+  # Create crash report directory with proper permissions
   systemd.tmpfiles.rules = [
     "d /srv/media 0775 mattm users -"
+    "d /var/crash-reports 0755 root root -"
+    "d /var/log/crash-analysis 0755 root root -"
   ];
+
+  # Enable hardware sensors
+  hardware.sensor.iio.enable = true;
 }

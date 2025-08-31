@@ -31,7 +31,16 @@
   boot.initrd.luks.devices."luks-0fd5c9ce-48db-4b98-bfc5-36d0124dc20a".device =
     "/dev/disk/by-uuid/0fd5c9ce-48db-4b98-bfc5-36d0124dc20a";
 
-  # Crash dump support for debugging system crashes
+  # Enhanced crash dump support for debugging system crashes
   boot.crashDump.enable = true;
-  boot.kernelParams = [ "crashkernel=256M" ];
+  boot.kernelParams = [ 
+    "crashkernel=256M"
+    "panic=10"              # Reboot after 10 seconds on panic
+    "oops=panic"            # Treat oops as panic for crash dumps
+    "panic_on_warn=0"       # Don't panic on warnings (too aggressive)
+    "softlockup_panic=1"    # Panic on soft lockups
+    "nmi_watchdog=1"        # Enable NMI watchdog
+    "printk.devkmsg=on"     # Enable /dev/kmsg for userspace logging
+    "log_buf_len=1M"        # Increase kernel log buffer size
+  ];
 }
