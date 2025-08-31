@@ -270,15 +270,18 @@ run_cmd "journalctl -b 0 --no-pager | grep -i -E '(niri|wayland|compositor)' | t
 add_section "GAMING AND PERFORMANCE ANALYSIS" "GameMode, thermal management, and performance service conflicts"
 
 run_cmd "systemctl status gamemode --no-pager" "GameMode service status" "medium"
-run_cmd "systemctl status auto-cpufreq --no-pager" "auto-cpufreq service status" "medium"
+run_cmd "systemctl status power-profiles-daemon --no-pager" "Power profiles daemon status" "medium"
 run_cmd "systemctl status thermald --no-pager" "Thermal daemon status" "high"
+run_cmd "powerprofilesctl list 2>/dev/null || echo 'Power profiles not available'" "Available power profiles" "medium"
+run_cmd "powerprofilesctl get 2>/dev/null || echo 'Current power profile not available'" "Current power profile" "low"
 run_cmd "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" "Current CPU governor" "medium"
+run_cmd "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver" "CPU frequency scaling driver" "low"
 run_cmd "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq | head -4" "Current CPU frequencies" "low"
 
-# Check for service conflicts (optimal: auto-cpufreq + thermald)
+# Check for service conflicts (optimal: power-profiles-daemon + thermald)
 SERVICES_RUNNING=0
 POWER_SERVICES=0
-for service in auto-cpufreq thermald; do
+for service in power-profiles-daemon thermald; do
     if systemctl is-active "$service" >/dev/null 2>&1; then
         ((SERVICES_RUNNING++))
         ((POWER_SERVICES++))
@@ -371,13 +374,13 @@ echo "1. Thermal Management: Check for temperature spikes correlating with crash
 echo "2. Graphics Driver: Intel i915 stability with Wayland/Niri compositor" >> "$REPORT_FILE"
 echo "3. Power Management: Battery critical events and AC adapter issues" >> "$REPORT_FILE"
 echo "4. Surface Hardware: Aggregator driver and Surface-specific touchpad issues" >> "$REPORT_FILE"
-echo "5. Power Service Configuration: Optimal auto-cpufreq + thermald setup" >> "$REPORT_FILE"
+echo "5. Power Service Configuration: Optimal power-profiles-daemon + thermald setup" >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 echo "SYSTEM CONFIGURATION NOTES:" >> "$REPORT_FILE"
-echo "- TLP has been removed to eliminate power management conflicts" >> "$REPORT_FILE"
-echo "- Optimal configuration: auto-cpufreq + thermald (no conflicts expected)" >> "$REPORT_FILE"
+echo "- Auto-cpufreq has been replaced with power-profiles-daemon for better Intel P-State compatibility" >> "$REPORT_FILE"
+echo "- Optimal configuration: power-profiles-daemon + thermald (native Intel driver support)" >> "$REPORT_FILE"
 echo "- Surface aggregator drivers loaded for hardware feature support" >> "$REPORT_FILE"
-echo "- GameMode configured with GPU optimization udev rules" >> "$REPORT_FILE"
+echo "- GameMode configured without CPU frequency conflicts (I/O and process priority only)" >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 echo "CORRELATION POINTS:" >> "$REPORT_FILE"
 echo "- Gaming sessions vs thermal throttling" >> "$REPORT_FILE"

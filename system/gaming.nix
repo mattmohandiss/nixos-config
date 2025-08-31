@@ -23,8 +23,6 @@
         inhibit_screensaver = 1;
         softrealtime = "on";
         reaper_freq = 3;
-        desiredgov = "ondemand";
-        defaultgov = "ondemand";
       };
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";
@@ -37,11 +35,6 @@
       };
       custom = {
         start = "${pkgs.writeShellScript "gamemode-start" ''
-          # Set conservative CPU frequency limits for consistent performance
-          echo 800000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-          echo 3200000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-          echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-          
           # Reduce background process priority
           for pid in $(pgrep -f "firefox|chrome|code|discord"); do
             renice 10 $pid 2>/dev/null || true
@@ -51,10 +44,6 @@
           echo mq-deadline > /sys/block/nvme0n1/queue/scheduler 2>/dev/null || true
         ''}";
         end = "${pkgs.writeShellScript "gamemode-end" ''
-          # Reset CPU frequency limits
-          echo 400000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-          echo 4000000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-          
           # Reset background process priority
           for pid in $(pgrep -f "firefox|chrome|code|discord"); do
             renice 0 $pid 2>/dev/null || true
@@ -124,24 +113,11 @@
   };
 
 
-  # Auto CPU frequency scaling optimized for consistent gaming performance
-  services.auto-cpufreq = {
-    enable = true;
-    settings = {
-      battery = {
-        governor = "powersave";
-        scaling_min_freq = 400000;
-        scaling_max_freq = 1800000;
-        turbo = "never";
-      };
-      charger = {
-        governor = "ondemand";
-        scaling_min_freq = 800000;
-        scaling_max_freq = 3200000;
-        turbo = "never";
-      };
-    };
-  };
+  # Use native Intel P-State driver with power profiles (more stable than auto-cpufreq)
+  services.auto-cpufreq.enable = false;
+  
+  # Enable power-profiles-daemon for better power management
+  services.power-profiles-daemon.enable = true;
 
   # Hardware sensors for temperature monitoring
   hardware.sensor.iio.enable = true;
