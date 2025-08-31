@@ -36,7 +36,12 @@
   ];
 
   # Shell configuration
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    initContent = ''
+      eval "$(direnv hook zsh)"
+    '';
+  };
   
   # Git configuration
   programs.git = {

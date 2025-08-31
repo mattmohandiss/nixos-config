@@ -25,6 +25,11 @@
             };
           };
         };
+        
+        # Direnv integration settings
+        "direnv.restart.automatic" = true;
+        "direnv.status.showOnStatusBar" = true;
+        
       };
 
       # Extensions
@@ -32,6 +37,9 @@
         with pkgs.vscode-extensions;
         [
           christian-kohler.path-intellisense
+          ms-python.python
+          ms-python.vscode-pylance
+          mkhl.direnv
         ]
         ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
           {

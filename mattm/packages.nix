@@ -30,11 +30,6 @@
     nixd # Nix language server
     nixfmt-rfc-style # Modern Nix formatter (RFC 166 style)
 
-    # Python development tools
-    uv # Modern Python package manager
-    python3 # Base Python interpreter
-    python3Packages.python-lsp-server # Language server for VS Code
-
     # Bun development tools
     bun # Fast JavaScript runtime and package manager
     
@@ -51,5 +46,8 @@
 
     grim
     slurp
+    
+    # Directory environment management
+    direnv
   ];
 }
