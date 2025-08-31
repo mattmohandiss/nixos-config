@@ -123,39 +123,6 @@
     '';
   };
 
-  # TLP optimized for consistent gaming performance
-  services.tlp = {
-    enable = true;
-    settings = {
-      # CPU performance settings - prioritize consistency
-      CPU_SCALING_GOVERNOR_ON_AC = "ondemand";
-      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      
-      # Conservative performance policy for stability
-      CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
-      
-      # Conservative thermal limits to prevent spikes
-      CPU_MAX_PERF_ON_AC = 80;
-      CPU_MAX_PERF_ON_BAT = 40;
-      
-      # Disable turbo boost for consistent performance
-      CPU_BOOST_ON_AC = 0;
-      CPU_BOOST_ON_BAT = 0;
-      
-      # Balanced platform profile
-      PLATFORM_PROFILE_ON_AC = "balanced";
-      PLATFORM_PROFILE_ON_BAT = "low-power";
-      
-      # Additional smoothness optimizations
-      CPU_SCALING_MIN_FREQ_ON_AC = 800000;
-      CPU_SCALING_MAX_FREQ_ON_AC = 3200000;
-      
-      # Thermal management
-      CPU_HWP_DYN_BOOST_ON_AC = 0;
-      CPU_HWP_DYN_BOOST_ON_BAT = 0;
-    };
-  };
 
   # Auto CPU frequency scaling optimized for consistent gaming performance
   services.auto-cpufreq = {

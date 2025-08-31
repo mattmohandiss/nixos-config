@@ -252,7 +252,9 @@ add_section "SURFACE PRO 8 SPECIFIC DIAGNOSTICS" "Surface hardware drivers and k
 run_cmd "lsmod | grep -E '(surface|i915|intel)'" "Surface and Intel driver modules" "high"
 run_cmd "sudo dmesg | grep -i -E '(surface|aggregator|i915|intel_pstate)' | tail -15" "Surface-specific kernel messages" "high"
 run_cmd "journalctl -b 0 --no-pager | grep -i surface | tail -10" "Surface driver journal entries" "medium"
-run_cmd "cat /sys/devices/platform/surface_aggregator*/modalias 2>/dev/null || echo 'Surface aggregator not found'" "Surface aggregator status" "medium"
+run_cmd "lsmod | grep surface_aggregator | head -5 || echo 'Surface aggregator modules not loaded'" "Surface aggregator status" "medium"
+run_cmd "ls /sys/class/power_supply/ | grep -E '(BAT|ADP)' | head -5 || echo 'No Surface power supplies detected'" "Surface power supply detection" "medium"
+run_cmd "find /sys/devices -name '*surface*' -type d 2>/dev/null | head -5 || echo 'No Surface device nodes found'" "Surface device nodes" "low"
 run_cmd "cat /proc/cpuinfo | grep -E '(flags|microcode)' | head -2" "CPU features and microcode" "low"
 
 # GRAPHICS AND WAYLAND ANALYSIS
@@ -269,22 +271,29 @@ add_section "GAMING AND PERFORMANCE ANALYSIS" "GameMode, thermal management, and
 
 run_cmd "systemctl status gamemode --no-pager" "GameMode service status" "medium"
 run_cmd "systemctl status auto-cpufreq --no-pager" "auto-cpufreq service status" "medium"
-run_cmd "systemctl status tlp --no-pager" "TLP power management status" "medium"
 run_cmd "systemctl status thermald --no-pager" "Thermal daemon status" "high"
 run_cmd "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" "Current CPU governor" "medium"
 run_cmd "cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq | head -4" "Current CPU frequencies" "low"
 
-# Check for service conflicts
+# Check for service conflicts (optimal: auto-cpufreq + thermald)
 SERVICES_RUNNING=0
-for service in gamemode auto-cpufreq tlp thermald; do
+POWER_SERVICES=0
+for service in auto-cpufreq thermald; do
     if systemctl is-active "$service" >/dev/null 2>&1; then
         ((SERVICES_RUNNING++))
+        ((POWER_SERVICES++))
     fi
 done
 
+# Check if GameMode is active (not a conflict, just informational)
+if systemctl is-active "gamemode" >/dev/null 2>&1; then
+    ((SERVICES_RUNNING++))
+fi
+
 add_json_metadata "performance_analysis" "
-  \"services_running\": $SERVICES_RUNNING,
-  \"potential_conflicts\": $([ $SERVICES_RUNNING -gt 2 ] && echo "true" || echo "false"),
+  \"power_services_running\": $POWER_SERVICES,
+  \"total_services_running\": $SERVICES_RUNNING,
+  \"optimal_config\": $([ $POWER_SERVICES -eq 2 ] && echo "true" || echo "false"),
   \"gamemode_active\": $(pgrep -f gamemode >/dev/null && echo "true" || echo "false")"
 
 # APPLICATION CRASH ANALYSIS
@@ -361,14 +370,21 @@ echo "PRIORITY INVESTIGATION AREAS:" >> "$REPORT_FILE"
 echo "1. Thermal Management: Check for temperature spikes correlating with crashes" >> "$REPORT_FILE"
 echo "2. Graphics Driver: Intel i915 stability with Wayland/Niri compositor" >> "$REPORT_FILE"
 echo "3. Power Management: Battery critical events and AC adapter issues" >> "$REPORT_FILE"
-echo "4. Service Conflicts: Multiple power/thermal management services" >> "$REPORT_FILE"
-echo "5. Surface Hardware: Aggregator driver and Surface-specific issues" >> "$REPORT_FILE"
+echo "4. Surface Hardware: Aggregator driver and Surface-specific touchpad issues" >> "$REPORT_FILE"
+echo "5. Power Service Configuration: Optimal auto-cpufreq + thermald setup" >> "$REPORT_FILE"
+echo "" >> "$REPORT_FILE"
+echo "SYSTEM CONFIGURATION NOTES:" >> "$REPORT_FILE"
+echo "- TLP has been removed to eliminate power management conflicts" >> "$REPORT_FILE"
+echo "- Optimal configuration: auto-cpufreq + thermald (no conflicts expected)" >> "$REPORT_FILE"
+echo "- Surface aggregator drivers loaded for hardware feature support" >> "$REPORT_FILE"
+echo "- GameMode configured with GPU optimization udev rules" >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 echo "CORRELATION POINTS:" >> "$REPORT_FILE"
 echo "- Gaming sessions vs thermal throttling" >> "$REPORT_FILE"
 echo "- Power state changes vs system crashes" >> "$REPORT_FILE"
 echo "- Heavy application usage vs memory pressure" >> "$REPORT_FILE"
 echo "- Wayland compositor restarts vs graphics driver errors" >> "$REPORT_FILE"
+echo "- Surface touchpad issues vs libinput errors" >> "$REPORT_FILE"
 
 # Final metadata summary
 add_json_metadata "final_summary" "
