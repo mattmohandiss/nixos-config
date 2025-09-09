@@ -69,7 +69,7 @@
     memtester
   ];
 
-  # Create crash report directory with proper permissions
+  # Create directories with proper permissions
   systemd.tmpfiles.rules = [
     "d /srv/media 0775 mattm users -"
     "d /var/crash-reports 0755 root root -"
