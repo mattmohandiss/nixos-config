@@ -33,6 +33,7 @@
 
   home.sessionPath = [
     "/etc/nixos/mattm/scripts"
+    "$HOME/.bun/bin"
   ];
 
   # Shell configuration
