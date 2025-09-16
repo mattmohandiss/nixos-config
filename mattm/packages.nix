@@ -49,5 +49,7 @@
     
     # Directory environment management
     direnv
+
+    nodejs
   ];
 }
