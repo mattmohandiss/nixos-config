@@ -1,6 +1,17 @@
 { pkgs, ... }:
 
+let
+  cascadeFox = pkgs.fetchFromGitHub {
+    owner = "cascadefox";
+    repo = "cascade";
+    rev = "main";
+    sha256 = "sha256-adhwQpPb69wT5SZTmu7VxBbFpM4NNAuz4258k46T4K0=";
+  };
+in
 {
+  # CascadeFox theme - copy entire chrome directory
+  home.file.".mozilla/firefox/default/chrome".source = "${cascadeFox}/chrome";
+
   # Firefox browser configuration
   programs.firefox = {
     enable = true;
@@ -55,6 +66,9 @@
         "browser.theme.toolbar-theme" = 0;
         "ui.systemUsesDarkTheme" = 1;
         "layout.css.prefers-color-scheme.content-override" = 0;
+
+        # Enable legacy user profile customizations for custom CSS
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
       };
 
       # Default search engine
