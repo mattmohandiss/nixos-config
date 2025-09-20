@@ -4,7 +4,6 @@
   imports = [ 
     ./hardware-configuration.nix
     ./boot.nix
-    ./hardware/surface-pro.nix
     ./networking.nix
     ./audio.nix
     ./power.nix

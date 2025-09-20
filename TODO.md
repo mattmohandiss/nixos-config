@@ -1,28 +1,11 @@
 # TODO
 
-## 🔧 System Improvements (Medium Priority)
-
-### Choose Steam Configuration Approach
-Decide between system-level Steam (`system/gaming.nix`) or user-level Steam override (`mattm/applications/gaming.nix`). Having both can cause conflicts.
-
 ## ⚙️ Configuration Tasks
 
 ### Consider Browser Configuration Consolidation
 Firefox and Zen Browser have nearly identical configurations. Consider if you need both browsers or if configs can be consolidated to reduce maintenance.
 
-### Verify Boot Configuration Consistency
-Check that LUKS device UUIDs in `system/boot.nix` and `system/hardware-configuration.nix` are consistent and correct. Ensure encryption setup is properly configured.
-
-### Review Crash Dump Settings
-Evaluate if crash dump with `crashkernel=256M` in `system/boot.nix` is still needed or if memory allocation should be adjusted for your system's requirements.
-
 ## 🖥️ Hardware & Firmware
-
-### Update Surface Pro Firmware
-Use USB to boot into Windows to update firmware for better hardware compatibility and performance.
-
-### Test Surface Pro 8 Features
-Test and optimize Surface Pro 8 specific settings including touch input, pen functionality, and stylus features.
 
 ### Configure External Monitor Setup
 Set up external monitor configuration for docking/undocking workflows to improve productivity when using external displays.

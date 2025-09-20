@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nur.url = "github:nix-community/NUR";
 
     home-manager = {
@@ -25,6 +26,7 @@
     {
       self,
       nixpkgs,
+      nixos-hardware,
       home-manager,
       stylix,
       nur,
@@ -39,6 +41,7 @@
       nixosConfigurations."nixos" = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
+          nixos-hardware.nixosModules.microsoft-surface-pro-intel
           stylix.nixosModules.stylix
           home-manager.nixosModules.home-manager
           ./system/configuration.nix
