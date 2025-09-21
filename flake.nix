@@ -38,34 +38,42 @@
       system = "x86_64-linux";
     in
     {
+      # NixOS system configuration (system-level only)
       nixosConfigurations."nixos" = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           nixos-hardware.nixosModules.microsoft-surface-pro-intel
           stylix.nixosModules.stylix
-          home-manager.nixosModules.home-manager
-          ./system/configuration.nix
+          ./nixos/configuration.nix
           {
             nixpkgs.config.allowUnfree = true;
             nixpkgs.overlays = [
               nur.overlays.default
               niri.overlays.niri
             ];
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.users.mattm = import ./mattm/configuration.nix;
-            home-manager.sharedModules = [
-              niri.homeModules.niri
-              niri.homeModules.stylix
-              zen-browser.homeModules.twilight
-            ];
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
-            };
           }
         ];
         specialArgs = {
+          inherit inputs;
+        };
+      };
+
+      # Standalone Home Manager configuration (user-level only)
+      homeConfigurations.mattm = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+          overlays = [
+            nur.overlays.default
+            niri.overlays.niri
+          ];
+        };
+        modules = [
+          ./home/default.nix
+          niri.homeModules.niri
+          zen-browser.homeModules.twilight
+        ];
+        extraSpecialArgs = {
           inherit inputs;
         };
       };

@@ -51,5 +51,11 @@
     direnv
 
     nodejs
+
+    # On Screen Keyboard
+    wvkbd
+
+    # Rotation
+    wlr-randr
   ];
 }

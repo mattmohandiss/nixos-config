@@ -3,20 +3,22 @@
 {
   imports = [ 
     ./hardware-configuration.nix
-    ./boot.nix
-    ./networking.nix
-    ./audio.nix
-    ./power.nix
-    ./security.nix
-    ./services.nix
-    ./users.nix
-    ./wayland.nix
-    ./gaming.nix
+    ./modules/boot.nix
+    ./modules/networking.nix
+    ./modules/audio.nix
+    ./modules/power.nix
+    ./modules/security.nix
+    ./modules/services.nix
+    ./modules/users.nix
+    ./modules/wayland.nix
+    ./modules/gaming.nix
   ];
 
   environment.systemPackages = with pkgs; [
     # Media libraries for MiniDLNA
     ffmpeg
+    # Home Manager CLI tool
+    home-manager
   ];
   
   # Note: gnome-keyring, libsecret, and nixfmt-rfc-style moved to user packages (mattm/packages.nix)

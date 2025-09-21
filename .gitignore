@@ -1,4 +1,4 @@
 .vscode
-mattm/wallpapers
+home/modules/wallpapers
 result
-mattm/mcp/**/node_modules/
+home/modules/mcp/**/node_modules/

@@ -22,6 +22,9 @@
               "nixos" = {
                 "expr" = "(builtins.getFlake \"/etc/nixos\").nixosConfigurations.nixos.options";
               };
+              "home-manager" = {
+                "expr" = "(builtins.getFlake \"/etc/nixos\").homeConfigurations.mattm.options";
+              };
             };
           };
         };
