@@ -80,6 +80,14 @@
     enable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
     autoEnable = true;
+    
+    # Font configuration
+    fonts = {
+      monospace = {
+        package = pkgs.nerd-fonts.fira-code;
+        name = "FiraCode Nerd Font";
+      };
+    };
   };
 
   system.stateVersion = "25.05";

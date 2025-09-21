@@ -7,6 +7,10 @@
     settings = {
       # Disable confirmation when closing window
       confirm_os_window_close = 0;
+      
+      # Enable better font rendering
+      disable_ligatures = "never";
+      
     };
   };
 }

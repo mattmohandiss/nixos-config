@@ -9,8 +9,11 @@
     profiles.default = {
       # Editor settings
       userSettings = {
+        # File settings
         "files.autoSave" = "afterDelay";
         "files.autoSaveDelay" = 1000;
+        
+        # Nix language server
         "nix.enableLanguageServer" = true;
         "nix.serverPath" = "nixd";
         "nix.serverSettings" = {

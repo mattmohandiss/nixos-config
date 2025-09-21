@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  # --- Core shell + modern tooling -------------------------------------------------
   programs.zsh = {
     enable = true;                         # Enable zsh as a login/interactive shell
     enableCompletion = true;               # Load zsh's completion system (compinit)
@@ -71,8 +70,8 @@
     nix-direnv.enable = true;             # Fast, reproducible Nix shells
   };
 
-  programs.eza.enable = true;             # Ensure eza is installed
-  programs.bat.enable = true;             # cat with wings
+  programs.eza.enable = true;             # better ls
+  programs.bat.enable = true;             # cat with syntax highlighting
   programs.zoxide.enable = true;          # Smarter cd
-  programs.starship.enable = true;        # Prompt engine (fast + batteries)
+  programs.starship.enable = true;        # Shell prompt
 }
