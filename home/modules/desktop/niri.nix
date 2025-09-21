@@ -81,8 +81,8 @@ in
         "XF86AudioMute".action = actions.spawn ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
 
         # Wallpaper management
-        "Mod+W".action = actions.spawn ["bash" "/etc/nixos/mattm/scripts/wallpaper"];
-        "Mod+Shift+W".action = actions.spawn ["bash" "/etc/nixos/mattm/scripts/wallpaper" "new"];
+        "Mod+W".action = actions.spawn ["bash" "/etc/nixos/home/modules/scripts/wallpaper"];
+        "Mod+Shift+W".action = actions.spawn ["bash" "/etc/nixos/home/modules/scripts/wallpaper" "new"];
         
         # Screenshot
         "Mod+S".action = actions.spawn ["sh" "-c" "grim -g \"$(slurp)\" - | wl-copy --type image/png"];

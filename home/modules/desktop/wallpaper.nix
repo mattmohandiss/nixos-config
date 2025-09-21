@@ -11,7 +11,7 @@
     Service = {
       ExecStart = "${pkgs.swww}/bin/swww-daemon";
       # Try current.jpg first, fallback to any wallpaper in the directory
-      ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.swww}/bin/swww img /etc/nixos/mattm/wallpapers/current.jpg'";
+      ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.swww}/bin/swww img /etc/nixos/home/modules/wallpapers/current.jpg'";
       Restart = "on-failure";
       RestartSec = 1;
       TimeoutStopSec = 10;

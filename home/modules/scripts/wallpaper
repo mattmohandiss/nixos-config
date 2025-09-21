@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-WALLPAPER_DIR="/etc/nixos/mattm/wallpapers"
+WALLPAPER_DIR="/etc/nixos/home/modules/wallpapers"
 API_URL="https://api.openai.com/v1/images/generations"
 MAX_WALLPAPERS=10
 PROMPT="A vibrant risograph-style landscape, with bold halftone textures and limited colors. Stylized with dramatic lighting and grainy print textures. High contrast, retro risograph aesthetic, suitable for a desktop wallpaper."
