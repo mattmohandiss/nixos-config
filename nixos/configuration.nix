@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports = [ 
@@ -28,6 +28,9 @@
     "flakes"
   ];
   nix.settings.download-buffer-size = 52428800;
+  
+  # NIX_PATH for better nixd flake support
+  nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
 
   # Time & locale
   time.timeZone = "America/New_York";

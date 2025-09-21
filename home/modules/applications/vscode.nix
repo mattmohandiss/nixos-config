@@ -15,16 +15,39 @@
         "nix.serverPath" = "nixd";
         "nix.serverSettings" = {
           "nixd" = {
+            # Evaluation settings - tells nixd how to understand your system
+            "eval" = {
+              "target" = {
+                "args" = [ "--flake" "/etc/nixos#nixos" ];
+                "installable" = "";
+              };
+            };
+            
+            # Formatting configuration
             "formatting" = {
               "command" = [ "nixfmt" ];
             };
+            
+            # Options documentation
             "options" = {
               "nixos" = {
-                "expr" = "(builtins.getFlake \"/etc/nixos\").nixosConfigurations.nixos.options";
+                "expr" = "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.nixos.options";
               };
               "home-manager" = {
-                "expr" = "(builtins.getFlake \"/etc/nixos\").homeConfigurations.mattm.options";
+                "expr" = "(builtins.getFlake (builtins.toString ./.)).nixosConfigurations.nixos.options.home-manager.users.type.getSubOptions []";
               };
+            };
+            
+            # Nixpkgs for package completions
+            "nixpkgs" = {
+              "expr" = "import (builtins.getFlake (builtins.toString ./.)).inputs.nixpkgs { }";
+            };
+            
+            # Diagnostic control
+            "diagnostic" = {
+              "suppress" = [
+                "sema-extra-with"
+              ];
             };
           };
         };
