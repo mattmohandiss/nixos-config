@@ -61,7 +61,7 @@
     ];
 
     extraLuaConfig = ''
-      dofile("/etc/nixos/mattm/configs/neovim/init.lua")
+      dofile("/etc/nixos/home/modules/configs/neovim/init.lua")
     '';
   };
 }
