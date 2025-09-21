@@ -32,6 +32,19 @@
   # NIX_PATH for better nixd flake support
   nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
 
+  # Automatic garbage collection
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+
+  # Automatic store optimization
+  nix.settings.auto-optimise-store = true;
+
+  # Limit number of generations to keep
+  boot.loader.systemd-boot.configurationLimit = 10;
+
   # Time & locale
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
