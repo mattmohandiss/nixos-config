@@ -35,15 +35,25 @@ in
       layout = {
         empty-workspace-above-first = true;
         
-        gaps = 0;
+        gaps = 1;
         # center-focused-column = "never";
         # always-center-single-column = false;
 
-        border = {
-          enable = true;
+        # border = {
+        #   enable = false;
+        #   width = 1;
+        # };
+
+        focus-ring = {
           width = 1;
         };
+
+        default-column-width = {};
       };
+
+      window-rules = [
+        { draw-border-with-background = false; }
+      ];
 
       # Keybindings
       binds = {

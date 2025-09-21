@@ -19,6 +19,11 @@
     ffmpeg
     # Home Manager CLI tool
     home-manager
+    # Modern CLI tools for zsh configuration
+    ripgrep
+    fd
+    neovim
+    git
   ];
   
   # Note: gnome-keyring, libsecret, and nixfmt-rfc-style moved to user packages (mattm/packages.nix)
@@ -63,6 +68,12 @@
   # Unfree packages allowed
   nixpkgs.config.allowUnfree = true;
 
+  # Fonts for proper icon display in terminal
+  fonts.packages = with pkgs; [ 
+    nerd-fonts.fira-code
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.hack
+  ];
 
   # Color Schemes
   stylix = {

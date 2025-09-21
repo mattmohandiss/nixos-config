@@ -21,6 +21,7 @@
     ./modules/applications/media.nix
     ./modules/applications/zen-browser.nix
     ./modules/applications/neovim.nix
+    ./modules/applications/zsh.nix
     # Note: styling.nix excluded - handled at system level
   ];
 
@@ -35,13 +36,6 @@
     "$HOME/.bun/bin"
   ];
 
-  # Shell configuration
-  programs.zsh = {
-    enable = true;
-    initContent = ''
-      eval "$(direnv hook zsh)"
-    '';
-  };
   
   # Git configuration
   programs.git = {

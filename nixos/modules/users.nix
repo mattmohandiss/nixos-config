@@ -24,5 +24,5 @@
   ];
 
   # Enable zsh shell
-  programs.zsh.enable = true;
+  programs.zsh.enable =  true;
 }
