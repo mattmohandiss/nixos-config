@@ -22,6 +22,10 @@ in
         "XDG_SESSION_TYPE" = "wayland";
         "GIO_USE_VFS" = "local";
         "DISPLAY" = ":0";
+        # Askpass configuration for fuzzel
+        "SSH_ASKPASS" = "/etc/nixos/home/modules/scripts/fuzzel-askpass";
+        "SUDO_ASKPASS" = "/etc/nixos/home/modules/scripts/fuzzel-askpass";
+        "SSH_ASKPASS_REQUIRE" = "force";
       };
 
       # Auto-start xwayland-satellite for X11 application support

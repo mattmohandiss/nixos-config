@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+# Fuzzel-based pinentry implementation for GPG agent
+# Implements the pinentry protocol using fuzzel for password prompts
+
+# Initialize variables
+DESCRIPTION=""
+PROMPT="PIN:"
+ERROR=""
+TITLE=""
+
+# Function to send OK response
+send_ok() {
+    echo "OK"
+}
+
+# Function to send error response
+send_error() {
+    echo "ERR 83886179 Operation cancelled <Pinentry>"
+}
+
+# Function to prompt for password using fuzzel
+get_password() {
+    local prompt_text="$PROMPT"
+    
+    # Add description if available
+    if [ -n "$DESCRIPTION" ]; then
+        prompt_text="$DESCRIPTION"
+    fi
+    
+    # Add error message if there was a previous error
+    if [ -n "$ERROR" ]; then
+        prompt_text="$ERROR - $prompt_text"
+    fi
+    
+    # Clean up prompt
+    prompt_text=$(echo "$prompt_text" | sed 's/:*[[:space:]]*$//')
+    
+    # Use fuzzel to get password
+    local password
+    password=$(fuzzel --dmenu --password --prompt="$prompt_text: " --placeholder="Enter PIN/password" 2>/dev/null)
+    
+    if [ $? -eq 0 ] && [ -n "$password" ]; then
+        echo "D $password"
+        send_ok
+    else
+        send_error
+    fi
+}
+
+# Main protocol loop
+send_ok
+
+while IFS= read -r line; do
+    case "$line" in
+        "GETPIN")
+            get_password
+            ;;
+        "SETDESC "*)
+            DESCRIPTION="${line#SETDESC }"
+            send_ok
+            ;;
+        "SETPROMPT "*)
+            PROMPT="${line#SETPROMPT }"
+            send_ok
+            ;;
+        "SETERROR "*)
+            ERROR="${line#SETERROR }"
+            send_ok
+            ;;
+        "SETTITLE "*)
+            TITLE="${line#SETTITLE }"
+            send_ok
+            ;;
+        "OPTION "*)
+            # Ignore options for now
+            send_ok
+            ;;
+        "BYE")
+            send_ok
+            exit 0
+            ;;
+        *)
+            # For any other command, just send OK
+            send_ok
+            ;;
+    esac
+done

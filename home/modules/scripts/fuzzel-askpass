@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Universal askpass script using fuzzel
+# Handles both SSH_ASKPASS and SUDO_ASKPASS scenarios
+
+# Get the prompt message from arguments or use default
+PROMPT="${1:-Password:}"
+
+# Clean up the prompt - remove any trailing colons or spaces
+PROMPT=$(echo "$PROMPT" | sed 's/:*[[:space:]]*$//')
+
+# Use fuzzel to prompt for password
+PASSWORD=$(fuzzel --dmenu --password --prompt="$PROMPT: " --placeholder="Enter password" 2>/dev/null)
+
+# Check if user cancelled or fuzzel failed
+if [ $? -ne 0 ] || [ -z "$PASSWORD" ]; then
+    exit 1
+fi
+
+# Output the password to stdout
+echo "$PASSWORD"

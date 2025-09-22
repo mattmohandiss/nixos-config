@@ -72,9 +72,9 @@
 
   services.gpg-agent = {
     enable = true;
-    pinentry = {
-      package = pkgs.pinentry-gtk2;
-    };
+    extraConfig = ''
+      pinentry-program /etc/nixos/home/modules/scripts/fuzzel-pinentry
+    '';
     enableSshSupport = true;
   };
 }
