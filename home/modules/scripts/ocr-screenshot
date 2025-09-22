@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# OCR Screenshot script - select area, extract text, copy to clipboard
+# Uses grim + slurp for area selection and tesseract for OCR
+
+set -euo pipefail
+
+# Generate timestamped filename for temporary image
+temp_file="/tmp/ocr-screenshot-$(date +%F-%T).png"
+
+# Take screenshot with area selection
+if ! grim -g "$(slurp)" "$temp_file"; then
+    notify-send "OCR Failed" "Could not capture screenshot" --icon=dialog-error
+    exit 1
+fi
+
+# Extract text using tesseract OCR
+if ! ocr_text=$(tesseract "$temp_file" stdout 2>/dev/null); then
+    notify-send "OCR Failed" "Could not extract text from image" --icon=dialog-error
+    rm -f "$temp_file"
+    exit 1
+fi
+
+# Clean up temporary file
+rm -f "$temp_file"
+
+# Check if any text was extracted
+if [ -z "$(echo "$ocr_text" | tr -d '[:space:]')" ]; then
+    notify-send "OCR Result" "No text found in selected area" --icon=dialog-information
+    exit 0
+fi
+
+# Copy extracted text to clipboard
+if ! echo -n "$ocr_text" | wl-copy; then
+    notify-send "OCR Failed" "Could not copy text to clipboard" --icon=dialog-error
+    exit 1
+fi
+
+# Create preview of extracted text for notification (limit to first 100 characters)
+preview_text=$(echo "$ocr_text" | head -c 100)
+if [ ${#ocr_text} -gt 100 ]; then
+    preview_text="${preview_text}..."
+fi
+
+# Show success notification with text preview
+notify-send "OCR Success" "Text copied to clipboard:\n\n$preview_text" --icon=edit-copy --expire-time=5000
+
+echo "OCR completed. Text copied to clipboard:"
+echo "$ocr_text"

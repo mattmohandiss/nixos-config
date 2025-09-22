@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Interactive screenshot script - handles everything in one place
+# Takes screenshot, copies to clipboard, and creates interactive notification
+
+set -euo pipefail
+
+# Generate timestamped filename
+file="/tmp/screenshot-$(date +%F-%T).png"
+
+# Take screenshot with area selection
+if ! grim -g "$(slurp)" "$file"; then
+    notify-send "Screenshot Failed" "Could not take screenshot" --icon=dialog-error
+    exit 1
+fi
+
+# Copy image to clipboard with proper MIME type
+if ! wl-copy --type image/png < "$file"; then
+    notify-send "Screenshot Saved" "File: $(basename "$file")\nWarning: Could not copy to clipboard" --icon=camera-photo
+    exit 1
+fi
+
+# Create notification and handle action in background
+filename=$(basename "$file")
+
+# Send notification and capture the action response
+action_response=$(notify-send \
+    "Screenshot Saved" \
+    "File: $filename\nPath: $file\n\nClick to copy path to clipboard" \
+    --icon=camera-photo \
+    --category=screenshot \
+    --expire-time=10000 \
+    --action="copy-path=Copy Path to Clipboard" \
+    --wait)
+
+# Handle the action response
+if [ "$action_response" = "copy-path" ]; then
+    echo -n "$file" | wl-copy
+    notify-send "Path Copied" "File path copied to clipboard" --icon=edit-copy --expire-time=2000
+fi &
+
+echo "Screenshot saved: $file"

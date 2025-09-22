@@ -46,6 +46,7 @@
 
     grim
     slurp
+    tesseract # OCR engine for text extraction
     
     # Directory environment management
     direnv

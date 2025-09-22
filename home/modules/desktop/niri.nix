@@ -34,21 +34,29 @@ in
       # Window layout configuration
       layout = {
         empty-workspace-above-first = true;
-        
-        gaps = 1;
+
+				 gaps = 0;
         # center-focused-column = "never";
         # always-center-single-column = false;
 
-        # border = {
-        #   enable = false;
-        #   width = 1;
-        # };
+         border = {
+					enable = true;
+          width = 1;
+         };
 
         focus-ring = {
-          width = 1;
-        };
+          enable = false;
+					width = 1;
+				};
 
-        default-column-width = {};
+        default-column-width = { };
+
+        preset-column-widths = [
+					{ proportion = 2. / 6.; }
+					{ proportion = 3. / 6.; }
+					{ proportion = 4. / 6.; }
+          { proportion = 6. / 6.; }
+        ];
       };
 
       window-rules = [
@@ -74,6 +82,8 @@ in
         "Mod+Shift+Up".action = actions.move-window-to-workspace-up;
         "Mod+Shift+Down".action = actions.move-window-to-workspace-down;
 
+        "Mod+Ctrl+Tab".action = actions.switch-preset-column-width;
+
         # Window resizing
         "Mod+Ctrl+Left".action = actions.set-column-width "-1%";
         "Mod+Ctrl+Right".action = actions.set-column-width "+1%";
@@ -82,26 +92,70 @@ in
         "Mod+F".action = actions.maximize-column;
 
         # Hardware controls - brightness
-        "Mod+XF86AudioRaiseVolume".action = actions.spawn ["brightnessctl" "set" "+5%"];
-        "Mod+XF86AudioLowerVolume".action = actions.spawn ["brightnessctl" "set" "5%-"];
+        "Mod+XF86AudioRaiseVolume".action = actions.spawn [
+          "brightnessctl"
+          "set"
+          "+5%"
+        ];
+        "Mod+XF86AudioLowerVolume".action = actions.spawn [
+          "brightnessctl"
+          "set"
+          "5%-"
+        ];
 
         # Hardware controls - audio
-        "XF86AudioRaiseVolume".action = actions.spawn ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "1%+"];
-        "XF86AudioLowerVolume".action = actions.spawn ["wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "1%-"];
-        "XF86AudioMute".action = actions.spawn ["wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
+        "XF86AudioRaiseVolume".action = actions.spawn [
+          "wpctl"
+          "set-volume"
+          "@DEFAULT_AUDIO_SINK@"
+          "1%+"
+        ];
+        "XF86AudioLowerVolume".action = actions.spawn [
+          "wpctl"
+          "set-volume"
+          "@DEFAULT_AUDIO_SINK@"
+          "1%-"
+        ];
+        "XF86AudioMute".action = actions.spawn [
+          "wpctl"
+          "set-mute"
+          "@DEFAULT_AUDIO_SINK@"
+          "toggle"
+        ];
 
         # Wallpaper management
-        "Mod+W".action = actions.spawn ["bash" "/etc/nixos/home/modules/scripts/wallpaper"];
-        "Mod+Shift+W".action = actions.spawn ["bash" "/etc/nixos/home/modules/scripts/wallpaper" "new"];
-        
+        "Mod+W".action = actions.spawn [
+          "bash"
+          "/etc/nixos/home/modules/scripts/wallpaper"
+        ];
+        "Mod+Shift+W".action = actions.spawn [
+          "bash"
+          "/etc/nixos/home/modules/scripts/wallpaper"
+          "new"
+        ];
+
         # Screenshot
-        "Mod+S".action = actions.spawn ["sh" "-c" "grim -g \"$(slurp)\" - | wl-copy --type image/png"];
-        
+        "Mod+S".action = actions.spawn [ "/etc/nixos/home/modules/scripts/screenshot-interactive" ];
+
+        # OCR Screenshot - select area and extract text to clipboard
+        "Mod+O".action = actions.spawn [ "/etc/nixos/home/modules/scripts/ocr-screenshot" ];
+
         # Temp Terminal
-        "Mod+T".action = actions.spawn ["kitten" "quick-access-terminal"];
+        "Mod+T".action = actions.spawn [
+          "kitten"
+          "quick-access-terminal"
+        ];
 
         # LLM
-        "Mod+L".action = actions.spawn ["kitten" "quick-access-terminal" "uv" "tool" "run" "llm" "chat"];
+        "Mod+L".action = actions.spawn [
+          "kitten"
+          "quick-access-terminal"
+          "uv"
+          "tool"
+          "run"
+          "llm"
+          "chat"
+        ];
       };
     };
   };
