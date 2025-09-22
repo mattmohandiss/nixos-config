@@ -13,7 +13,7 @@ vim.keymap.set('n', '<A-Right>', ':BufferLineCycleNext<CR>', { desc = 'Next buff
 vim.keymap.set('n', '<A-Left>', ':BufferLineCyclePrev<CR>', { desc = 'Previous buffer', silent = true })
 vim.keymap.set('n', '<A-S-Left>', ':BufferLineMovePrev<CR>', { desc = 'Move buffer left', silent = true })
 vim.keymap.set('n', '<A-S-Right>', ':BufferLineMoveNext<CR>', { desc = 'Move buffer right', silent = true })
-vim.keymap.set('n', '<A-q>', ':bdelete<CR>', { desc = 'Close current buffer', silent = true })
+vim.keymap.set('n', '<A-Escape>', ':bdelete<CR>', { desc = 'Close current buffer', silent = true })
 
 -- Copy/paste with Alt+C and Alt+V
 vim.keymap.set('v', '<A-c>', '"+y', { desc = 'Copy to clipboard', silent = true })
