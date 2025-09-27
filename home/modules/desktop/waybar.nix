@@ -26,7 +26,7 @@
 
         clock = {
           interval = 1;
-          timezone = "America/New_York";
+          timezone = "";
           tooltip-format = "{:%a %b %d %Y}";
           format = "{:%H:%M:%S}";
         };
