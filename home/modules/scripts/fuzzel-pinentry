@@ -36,9 +36,9 @@ get_password() {
     # Clean up prompt
     prompt_text=$(echo "$prompt_text" | sed 's/:*[[:space:]]*$//')
     
-    # Use fuzzel to get password
+    # Use fuzzel to get password with wider window and compact height
     local password
-    password=$(fuzzel --dmenu --password --prompt="$prompt_text: " --placeholder="Enter PIN/password" 2>/dev/null)
+    password=$(fuzzel --dmenu --password --prompt="$prompt_text: " --placeholder="Enter PIN/password" --width=70 --horizontal-pad=12 --vertical-pad=4 --lines=1 2>/dev/null)
     
     if [ $? -eq 0 ] && [ -n "$password" ]; then
         echo "D $password"

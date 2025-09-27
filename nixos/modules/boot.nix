@@ -3,6 +3,7 @@
 {
   # Bootloader
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.memtest86.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Surface Pro 8 keyboard support for LUKS password entry
@@ -40,9 +41,12 @@
 
   # Manual crash dump configuration (disable NixOS module to avoid aggressive panic settings)
   boot.crashDump.enable = false;
+
+
   boot.kernelParams = [
+    "mem_sleep_default=deep" # Prefer deep sleep over s2idle
     "crashkernel=128M" # Reduced crash kernel memory reservation
-    "panic=30" # Reboot after 30 seconds on panic (more time to see error)
+    "panic=10" # Reboot after 10 seconds on panic (more time to see error)
     # "oops=panic"          # DISABLED: Don't treat oops as panic (too aggressive)
     "panic_on_warn=0" # Don't panic on warnings
     # "softlockup_panic=1"  # DISABLED: Don't panic on soft lockups (too sensitive)

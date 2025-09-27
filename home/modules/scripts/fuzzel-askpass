@@ -9,8 +9,8 @@ PROMPT="${1:-Password:}"
 # Clean up the prompt - remove any trailing colons or spaces
 PROMPT=$(echo "$PROMPT" | sed 's/:*[[:space:]]*$//')
 
-# Use fuzzel to prompt for password
-PASSWORD=$(fuzzel --dmenu --password --prompt="$PROMPT: " --placeholder="Enter password" 2>/dev/null)
+# Use fuzzel to prompt for password with wider window and compact height
+PASSWORD=$(fuzzel --dmenu --password --prompt="$PROMPT: " --placeholder="Enter password" --width=70 --horizontal-pad=12 --vertical-pad=4 --lines=1 2>/dev/null)
 
 # Check if user cancelled or fuzzel failed
 if [ $? -ne 0 ] || [ -z "$PASSWORD" ]; then

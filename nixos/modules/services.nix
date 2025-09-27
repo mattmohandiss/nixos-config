@@ -30,6 +30,7 @@
       RateLimitBurst=10000
     '';
   };
+  hardware.rasdaemon.enable = true;
 
   # System coredump collection
   systemd.coredump = {

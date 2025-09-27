@@ -1,454 +1,97 @@
 #!/usr/bin/env bash
 
-# NixOS Surface Pro 8 Optimized Crash Analysis Script
-# Focused on Surface Pro 8 specific issues and crash patterns
-# Optimized for faster execution and better crash correlation
+# This script must be run with sudo
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run this script with sudo."
+    exit 1
+fi
 
-set -euo pipefail
+# Comprehensive Crash Analysis Script for NixOS
+# Generates a report for AI-powered diagnosis of sudden shutdowns.
 
-# Configuration
-REPORT_DIR="/var/crash-reports"
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-REPORT_FILE="$REPORT_DIR/crash_report_$TIMESTAMP.txt"
-JSON_METADATA_FILE="$REPORT_DIR/crash_metadata_$TIMESTAMP.json"
+# --- Functions ---
 
-# Ensure report directory exists with proper permissions
-sudo mkdir -p "$REPORT_DIR"
-sudo chown mattm:users "$REPORT_DIR" 2>/dev/null || true
-sudo chmod 755 "$REPORT_DIR" 2>/dev/null || true
-
-# Colors for terminal output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Logging functions
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1" >&2
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1" >&2
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
-}
-
-# Function to add section headers with consistent formatting
+# Adds a formatted section header to the report.
 add_section() {
     local title="$1"
-    local description="$2"
-    echo "" >> "$REPORT_FILE"
-    echo "=================================================================================" >> "$REPORT_FILE"
-    echo "  $title" >> "$REPORT_FILE"
-    echo "=================================================================================" >> "$REPORT_FILE"
-    echo "Description: $description" >> "$REPORT_FILE"
-    echo "Timestamp: $(date)" >> "$REPORT_FILE"
-    echo "" >> "$REPORT_FILE"
+    echo ""
+    echo "================================================================================="
+    echo "  $title"
+    echo "================================================================================="
+    echo ""
 }
 
-# Function to add JSON metadata block
-add_json_metadata() {
-    local section="$1"
-    local data="$2"
-    echo "" >> "$REPORT_FILE"
-    echo "--- JSON_METADATA_START ---" >> "$REPORT_FILE"
-    echo "{" >> "$REPORT_FILE"
-    echo "  \"section\": \"$section\"," >> "$REPORT_FILE"
-    echo "  \"timestamp\": \"$(date -Iseconds)\"," >> "$REPORT_FILE"
-    echo "$data" >> "$REPORT_FILE"
-    echo "}" >> "$REPORT_FILE"
-    echo "--- JSON_METADATA_END ---" >> "$REPORT_FILE"
-    echo "" >> "$REPORT_FILE"
+# Reads and clears logs from the kernel's persistent storage (pstore).
+add_pstore_logs() {
+    local pstore_dir="/sys/fs/pstore"
+    if [ -d "$pstore_dir" ] && [ -n "$(ls -A $pstore_dir 2>/dev/null)" ]; then
+        echo "--- Persistent Crash Logs (pstore) ---"
+        echo "Found previous kernel crash logs. This is strong evidence of a panic or oops."
+        echo ""
+        bash -c '
+            for file in /sys/fs/pstore/*; do
+                echo "Log file: $file"
+                echo "--- BEGIN LOG ---"
+                cat "$file"
+                echo "--- END LOG ---"
+                # Remove the file after reading to prevent old logs from reappearing
+                echo "Removing log file: $file"
+                rm "$file"
+            done
+        '
+        echo ""
+    else
+        echo "--- Persistent Crash Logs (pstore) ---"
+        echo "No persistent crash logs found in /sys/fs/pstore."
+        echo ""
+    fi
 }
 
-# Function to run command and capture output safely
+# Runs a command and prints its output to the report.
 run_cmd() {
     local cmd="$1"
     local description="$2"
-    local severity="${3:-info}"
-    
-    log_info "Collecting: $description"
-    echo "Command: $cmd" >> "$REPORT_FILE"
-    echo "Description: $description" >> "$REPORT_FILE"
-    echo "Severity: $severity" >> "$REPORT_FILE"
-    echo "Output:" >> "$REPORT_FILE"
-    
-    if timeout 30 bash -c "$cmd" >> "$REPORT_FILE" 2>&1; then
-        log_success "$description completed"
-        echo "Status: SUCCESS" >> "$REPORT_FILE"
-    else
-        local exit_code=$?
-        log_warning "$description failed (exit code: $exit_code)"
-        echo "Status: FAILED (exit code: $exit_code)" >> "$REPORT_FILE"
+
+    echo "--- $description ---"
+    echo "Command: $cmd"
+    echo "Output:"
+    if ! timeout 30 bash -c "$cmd"; then
+        echo "  [ERROR] Command failed to execute or timed out."
     fi
-    echo "" >> "$REPORT_FILE"
+    echo ""
 }
 
-# Function to detect system anomalies (enhanced)
-detect_anomalies() {
-    local anomalies=()
-    
-    # Check for thermal throttling
-    if sensors 2>/dev/null | grep -q "ALARM\|CRIT" || sudo dmesg 2>/dev/null | grep -q "thermal"; then
-        anomalies+=("thermal_issues")
-    fi
-    
-    # Check for recent crashes
-    if journalctl -b 0 --since "1 hour ago" | grep -qi "segfault\|panic\|oops"; then
-        anomalies+=("recent_crashes")
-    fi
-    
-    # Check for GPU hangs
-    if sudo dmesg 2>/dev/null | grep -qi "gpu hang\|i915.*reset"; then
-        anomalies+=("gpu_hangs")
-    fi
-    
-    # Check for power issues (enhanced)
-    if journalctl -b 0 | grep -qi "battery.*critical\|power.*critical\|thermal.*shutdown"; then
-        anomalies+=("power_critical")
-    fi
-    
-    # Check for ITHC issues (new)
-    if sudo dmesg 2>/dev/null | grep -qi "ithc.*error\|ithc.*timeout\|ithc.*failed"; then
-        anomalies+=("ithc_errors")
-    fi
-    
-    # Check for battery degradation (new)
-    if acpi -V 2>/dev/null | grep -q "design capacity.*[0-9].*last full capacity.*[0-9]"; then
-        local design=$(acpi -V 2>/dev/null | grep -o "design capacity [0-9]*" | grep -o "[0-9]*")
-        local current=$(acpi -V 2>/dev/null | grep -o "last full capacity [0-9]*" | grep -o "[0-9]*")
-        if [ -n "$design" ] && [ -n "$current" ] && [ "$design" -gt 0 ]; then
-            local health=$((current * 100 / design))
-            if [ "$health" -lt 50 ]; then
-                anomalies+=("battery_degraded")
-            fi
-        fi
-    fi
-    
-    # Check for filesystem corruption (new)
-    if sudo dmesg 2>/dev/null | grep -qi "ext4.*error\|filesystem.*corruption\|orphaned inode"; then
-        anomalies+=("filesystem_corruption")
-    fi
-    
-    # Check for memory pressure
-    if free | awk 'NR==2{printf "%.1f", $3*100/$2}' | awk '{if($1>90) print "high"}' | grep -q "high"; then
-        anomalies+=("memory_pressure")
-    fi
-    
-    if [ ${#anomalies[@]} -eq 0 ]; then
-        echo ""
-    else
-        printf '%s\n' "${anomalies[@]}"
-    fi
-}
+# --- Report Generation ---
 
-# Function to get system context (enhanced)
-get_system_context() {
-    local context=()
-    
-    # Check if gaming mode is active
-    if pgrep -f "gamemode" >/dev/null 2>&1; then
-        context+=("gaming_active")
-    fi
-    
-    # Check power source
-    if acpi -a 2>/dev/null | grep -q "on-line"; then
-        context+=("ac_power")
-    else
-        context+=("battery_power")
-    fi
-    
-    # Check if Niri is running
-    if pgrep -f "niri" >/dev/null 2>&1; then
-        context+=("niri_active")
-    fi
-    
-    # Check for heavy applications
-    if pgrep -f "steam\|blender\|godot" >/dev/null 2>&1; then
-        context+=("heavy_apps_running")
-    fi
-    
-    # Check thermal state (new)
-    if sensors 2>/dev/null | grep -E "Core|Package" | grep -q "+[7-9][0-9]°C\|+[0-9][0-9][0-9]°C"; then
-        context+=("high_temperature")
-    fi
-    
-    # Check battery level (new)
-    local battery_level=$(acpi -b 2>/dev/null | grep -o "[0-9]*%" | head -1 | tr -d '%')
-    if [ -n "$battery_level" ] && [ "$battery_level" -lt 20 ]; then
-        context+=("low_battery")
-    fi
-    
-    printf '%s\n' "${context[@]}"
-}
+echo "NixOS Crash Analysis Report"
+echo "Generated: $(date)"
+echo "Hostname: $(hostname)"
+echo "User: $(whoami)"
+echo "Kernel: $(uname -r)"
+echo "Uptime: $(uptime)"
 
-# Initialize report
-log_info "Starting optimized crash analysis..."
-echo "NixOS Surface Pro 8 Optimized Crash Analysis Report" > "$REPORT_FILE"
-echo "Generated: $(date)" >> "$REPORT_FILE"
-echo "Hostname: $(hostname)" >> "$REPORT_FILE"
-echo "User: $(whoami)" >> "$REPORT_FILE"
-echo "Kernel: $(uname -r)" >> "$REPORT_FILE"
-echo "Uptime: $(uptime)" >> "$REPORT_FILE"
+add_section "KERNEL AND SYSTEM ERRORS"
+add_pstore_logs
+run_cmd "journalctl -k -b -1 --no-pager | grep -i -E '(panic|oops|segfault|killed|oom|thermal|mce|hardware error)' | tail -20" "Critical kernel messages from previous boot"
+run_cmd "journalctl -b -1 --no-pager | grep -i -E '(error|fail|panic|crash|segfault|killed)' | tail -20" "Previous boot error messages"
+run_cmd "journalctl -b -1 --no-pager | tail -100" "Previous boot final 100 log entries"
 
-# Detect anomalies and system context
-ANOMALIES_RAW=$(detect_anomalies)
-SYSTEM_CONTEXT_RAW=$(get_system_context)
+add_section "APPLICATION CRASH ANALYSIS"
+run_cmd "coredumpctl list -b -1 --no-pager" "Application coredumps from previous boot"
 
-# Convert to arrays, handling empty results
-if [ -n "$ANOMALIES_RAW" ]; then
-    IFS=$'\n' read -d '' -r -a ANOMALIES <<< "$ANOMALIES_RAW" || true
-else
-    ANOMALIES=()
-fi
+add_section "HARDWARE HEALTH ANALYSIS"
+run_cmd "ras-mc-ctl --summary" "RAS daemon summary (CPU/Memory Errors)"
+run_cmd "sensors" "All temperature readings"
+run_cmd "smartctl -a /dev/nvme0n1" "NVMe drive health"
+run_cmd "cat /proc/loadavg" "System load averages"
 
-if [ -n "$SYSTEM_CONTEXT_RAW" ]; then
-    IFS=$'\n' read -d '' -r -a SYSTEM_CONTEXT <<< "$SYSTEM_CONTEXT_RAW" || true
-else
-    SYSTEM_CONTEXT=()
-fi
+add_section "POWER AND BATTERY ANALYSIS"
+run_cmd "acpi -V" "Complete ACPI power status"
+run_cmd "upower -i $(upower -e | grep 'BAT')" "Detailed battery health and status"
+run_cmd "cat /sys/class/power_supply/BAT*/cycle_count" "Battery cycle count"
 
-# Add executive summary
-add_section "EXECUTIVE SUMMARY" "High-level crash analysis overview with key findings"
+add_section "GRAPHICS AND WAYLAND ANALYSIS"
+run_cmd "journalctl -b -1 --no-pager | grep -i -E '(drm|i915|gpu|graphics)' | tail -15" "Graphics driver messages from previous boot"
+run_cmd "journalctl -b -1 --no-pager | grep -i -E '(niri|wayland|compositor)' | tail -10" "Wayland compositor journal entries from previous boot"
 
-echo "CRASH ANALYSIS SUMMARY:" >> "$REPORT_FILE"
-echo "- Report generated after system restart/crash" >> "$REPORT_FILE"
-echo "- System uptime: $(uptime)" >> "$REPORT_FILE"
-echo "- Detected anomalies: ${#ANOMALIES[@]}" >> "$REPORT_FILE"
-for anomaly in "${ANOMALIES[@]}"; do
-    echo "  * $anomaly" >> "$REPORT_FILE"
-done
-echo "- System context: ${#SYSTEM_CONTEXT[@]} factors" >> "$REPORT_FILE"
-for context in "${SYSTEM_CONTEXT[@]}"; do
-    echo "  * $context" >> "$REPORT_FILE"
-done
-
-# Add JSON metadata for executive summary
-ANOMALIES_JSON=""
-if [ ${#ANOMALIES[@]} -gt 0 ]; then
-    ANOMALIES_JSON=$(printf '\"%s\",' "${ANOMALIES[@]}" | sed 's/,$//')
-fi
-
-CONTEXT_JSON=""
-if [ ${#SYSTEM_CONTEXT[@]} -gt 0 ]; then
-    CONTEXT_JSON=$(printf '\"%s\",' "${SYSTEM_CONTEXT[@]}" | sed 's/,$//')
-fi
-
-add_json_metadata "executive_summary" "
-  \"anomalies\": [$ANOMALIES_JSON],
-  \"system_context\": [$CONTEXT_JSON],
-  \"uptime_seconds\": $(awk '{print int($1)}' /proc/uptime),
-  \"crash_severity\": \"$([ ${#ANOMALIES[@]} -gt 2 ] && echo "high" || echo "medium")\""
-
-# POWER AND BATTERY ANALYSIS (moved to priority position #2)
-add_section "POWER AND BATTERY ANALYSIS" "Critical power management, battery health, and power-related crashes"
-
-run_cmd "acpi -V 2>/dev/null || echo 'ACPI info unavailable'" "Complete ACPI power status" "critical"
-run_cmd "upower -i \$(upower -e | grep 'BAT') 2>/dev/null || echo 'Battery info unavailable'" "Detailed battery health and status" "critical"
-run_cmd "cat /sys/class/power_supply/BAT*/cycle_count 2>/dev/null || echo 'Cycle count unavailable'" "Battery cycle count" "high"
-run_cmd "cat /sys/class/power_supply/BAT*/capacity_level 2>/dev/null || echo 'Capacity level unavailable'" "Battery capacity level" "high"
-run_cmd "cat /sys/class/power_supply/BAT*/voltage_now 2>/dev/null || echo 'Battery voltage unavailable'" "Battery voltage readings" "critical"
-run_cmd "cat /sys/class/power_supply/ADP*/voltage_now 2>/dev/null || echo 'AC voltage unavailable'" "AC adapter voltage" "high"
-run_cmd "journalctl -b 0 --no-pager | grep -i -E '(battery|power|thermal.*shutdown|critical)' | tail -15" "Power-related events" "high"
-run_cmd "journalctl -b 0 --no-pager | grep -i -E '(suspend|resume|hibernate|power.*state)' | tail -10" "Power state transitions" "high"
-run_cmd "cat /sys/class/power_supply/ADP*/online 2>/dev/null && echo 'AC adapter connected' || echo 'On battery power'" "Power source status" "medium"
-run_cmd "cat /sys/power/state" "Available power states" "medium"
-
-# HARDWARE HEALTH ANALYSIS
-add_section "HARDWARE HEALTH ANALYSIS" "Surface Pro 8 specific hardware monitoring and health checks"
-
-run_cmd "sensors | grep -E '°C'" "All temperature readings" "critical"
-run_cmd "sudo smartctl -a /dev/nvme0n1 2>/dev/null || echo 'SMART data unavailable'" "NVMe drive health" "high"
-run_cmd "cat /proc/loadavg" "System load averages" "high"
-run_cmd "cat /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null || echo 'GPU utilization unavailable'" "GPU utilization" "medium"
-run_cmd "cat /proc/cpuinfo | grep -E '(model name|flags|microcode)' | head -3" "CPU information and features" "low"
-
-# Add thermal analysis metadata
-add_json_metadata "hardware_health" "
-  \"thermal_critical\": $(sensors 2>/dev/null | grep -q "ALARM\|CRIT" && echo "true" || echo "false"),
-  \"nvme_available\": $([ -e /dev/nvme0n1 ] && echo "true" || echo "false"),
-  \"thermal_zones\": $(ls /sys/class/thermal/thermal_zone* 2>/dev/null | wc -l)"
-
-# SURFACE PRO 8 SPECIFIC DIAGNOSTICS (enhanced)
-add_section "SURFACE PRO 8 SPECIFIC DIAGNOSTICS" "Surface hardware drivers and known issues"
-
-run_cmd "lsmod | grep -E '(surface|i915|intel|ithc)'" "Surface and Intel driver modules" "high"
-run_cmd "lsmod | grep ithc" "ITHC touch controller driver status" "high"
-run_cmd "sudo dmesg | grep -i ithc | tail -10" "ITHC driver messages" "high"
-run_cmd "ls -la /dev/hidraw* 2>/dev/null | head -5 || echo 'No HID raw devices'" "HID raw devices" "medium"
-run_cmd "sudo dmesg | grep -i -E '(surface|aggregator|i915|intel_pstate)' | tail -15" "Surface-specific kernel messages" "high"
-run_cmd "journalctl -b 0 --no-pager | grep -i surface | tail -10" "Surface driver journal entries" "medium"
-run_cmd "lsmod | grep surface_aggregator | head -5 || echo 'Surface aggregator modules not loaded'" "Surface aggregator status" "medium"
-run_cmd "ls /sys/class/power_supply/ | grep -E '(BAT|ADP)' | head -5 || echo 'No Surface power supplies detected'" "Surface power supply detection" "medium"
-
-# CRASH TIMELINE ANALYSIS
-add_section "CRASH TIMELINE ANALYSIS" "Timeline reconstruction of events leading to system crash"
-
-run_cmd "journalctl -b -1 --no-pager | tail -50" "Previous boot final log entries" "critical"
-run_cmd "journalctl -b 0 --no-pager --since '10 minutes ago'" "Current boot recent entries" "high"
-run_cmd "journalctl -b 0 --since '30 minutes ago' --no-pager | grep -E '($(date +%H:%M)|$(date -d '1 minute ago' +%H:%M)|$(date -d '2 minutes ago' +%H:%M))'" "Crash-time events" "critical"
-run_cmd "last -x | head -10" "Recent system boot/shutdown history" "medium"
-run_cmd "ls -la /var/crash-reports/ | wc -l && echo 'crashes in last 7 days: '$(find /var/crash-reports/ -mtime -7 | wc -l)" "Crash frequency analysis" "high"
-run_cmd "who -b" "Current boot time" "low"
-
-# KERNEL AND SYSTEM ERRORS (enhanced)
-add_section "KERNEL AND SYSTEM ERRORS" "Kernel panics, oops, and critical system errors"
-
-run_cmd "sudo dmesg -T | grep -i -E '(panic|oops|segfault|killed|oom|thermal|mce|hardware error)' | tail -20" "Critical kernel messages" "critical"
-run_cmd "sudo dmesg | grep -i -E '(ext4.*error|filesystem.*corruption|orphaned inode)' | tail -10" "Filesystem corruption messages" "high"
-run_cmd "journalctl -b 0 --no-pager | grep -i -E '(error|fail|panic|crash|segfault|killed)' | tail -20" "Current boot error messages" "high"
-run_cmd "journalctl -b -1 --no-pager | grep -i -E '(error|fail|panic|crash|segfault|killed)' | tail -20" "Previous boot error messages" "critical"
-
-# GRAPHICS AND WAYLAND ANALYSIS
-add_section "GRAPHICS AND WAYLAND ANALYSIS" "Niri compositor, Intel graphics, and Wayland stack analysis"
-
-run_cmd "pgrep -af niri" "Niri compositor process status" "high"
-run_cmd "pgrep -af 'xwayland|waybar|fuzzel'" "Wayland stack processes" "medium"
-run_cmd "sudo dmesg | grep -i -E '(drm|i915|gpu|graphics)' | tail -15" "Graphics driver messages" "high"
-run_cmd "journalctl -b 0 --no-pager | grep -i -E '(niri|wayland|compositor)' | tail -10" "Wayland compositor journal entries" "medium"
-
-# GAMING AND PERFORMANCE ANALYSIS
-add_section "GAMING AND PERFORMANCE ANALYSIS" "GameMode, thermal management, and performance service conflicts"
-
-run_cmd "ps aux | grep -E '(steam|gamemode|lutris|wine)' | head -5" "Active gaming processes" "medium"
-run_cmd "systemctl status power-profiles-daemon --no-pager" "Power profiles daemon status" "medium"
-run_cmd "systemctl status thermald --no-pager" "Thermal daemon status" "high"
-run_cmd "powerprofilesctl list 2>/dev/null || echo 'Power profiles not available'" "Available power profiles" "medium"
-run_cmd "powerprofilesctl get 2>/dev/null || echo 'Current power profile not available'" "Current power profile" "low"
-run_cmd "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" "Current CPU governor" "medium"
-run_cmd "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver" "CPU frequency scaling driver" "low"
-
-# Check for service conflicts (optimal: power-profiles-daemon + thermald)
-SERVICES_RUNNING=0
-POWER_SERVICES=0
-for service in power-profiles-daemon thermald; do
-    if systemctl is-active "$service" >/dev/null 2>&1; then
-        ((SERVICES_RUNNING++))
-        ((POWER_SERVICES++))
-    fi
-done
-
-# Check if GameMode is active (not a conflict, just informational)
-if systemctl is-active "gamemode" >/dev/null 2>&1; then
-    ((SERVICES_RUNNING++))
-fi
-
-add_json_metadata "performance_analysis" "
-  \"power_services_running\": $POWER_SERVICES,
-  \"total_services_running\": $SERVICES_RUNNING,
-  \"optimal_config\": $([ $POWER_SERVICES -eq 2 ] && echo "true" || echo "false"),
-  \"gamemode_active\": $(pgrep -f gamemode >/dev/null && echo "true" || echo "false")"
-
-# MEMORY AND STORAGE ANALYSIS (enhanced for AI)
-add_section "MEMORY AND STORAGE ANALYSIS" "Memory usage, swap, and storage health"
-
-run_cmd "free -h" "Memory usage summary" "medium"
-run_cmd "cat /proc/pressure/memory 2>/dev/null || echo 'PSI unavailable'" "Memory pressure metrics" "high"
-run_cmd "cat /proc/meminfo | grep -E '(MemAvailable|Buffers|Cached|SwapTotal|SwapFree)'" "Detailed memory breakdown" "medium"
-run_cmd "sudo dmesg | grep -i -E '(oom|memory|swap)' | tail -10" "Memory-related kernel messages" "high"
-run_cmd "journalctl -b 0 --no-pager | grep -i -E '(memory|oom|swap)' | tail -5" "Memory-related journal entries" "medium"
-run_cmd "systemctl --failed --no-pager" "Failed system services" "high"
-
-# CRASH PATTERN ANALYSIS (simplified)
-add_section "CRASH PATTERN ANALYSIS" "Multi-boot crash correlation and pattern detection"
-
-# Simple pattern detection
-if ls "$REPORT_DIR"/crash_report_*.txt >/dev/null 2>&1; then
-    REPORT_COUNT=$(ls -t "$REPORT_DIR"/crash_report_*.txt | wc -l)
-    echo "Previous crash reports found: $REPORT_COUNT" >> "$REPORT_FILE"
-    
-    # Quick pattern check
-    RECENT_REPORTS=$(ls -t "$REPORT_DIR"/crash_report_*.txt | head -3)
-    echo "" >> "$REPORT_FILE"
-    echo "Quick Pattern Analysis:" >> "$REPORT_FILE"
-    if grep -l "thermal\|temperature" $RECENT_REPORTS >/dev/null 2>&1; then
-        echo "- Recurring thermal issues detected" >> "$REPORT_FILE"
-    fi
-    if grep -l "battery.*critical\|power.*critical" $RECENT_REPORTS >/dev/null 2>&1; then
-        echo "- Recurring power/battery issues detected" >> "$REPORT_FILE"
-    fi
-    if grep -l "ithc\|touch" $RECENT_REPORTS >/dev/null 2>&1; then
-        echo "- Recurring touch controller issues detected" >> "$REPORT_FILE"
-    fi
-    if grep -l "gaming\|gamemode\|steam" $RECENT_REPORTS >/dev/null 2>&1; then
-        echo "- Gaming-related crashes detected" >> "$REPORT_FILE"
-    fi
-else
-    echo "No previous crash reports found for pattern analysis" >> "$REPORT_FILE"
-fi
-
-# RECOMMENDATIONS FOR LLM ANALYSIS (updated)
-add_section "LLM ANALYSIS RECOMMENDATIONS" "Suggested investigation areas and correlation points"
-
-echo "PRIORITY INVESTIGATION AREAS:" >> "$REPORT_FILE"
-echo "1. Battery Health: Check for severe capacity degradation (primary crash cause)" >> "$REPORT_FILE"
-echo "2. ITHC Touch Controller: Monitor for DMA timeouts and driver errors" >> "$REPORT_FILE"
-echo "3. Power State Transitions: Correlate crashes with suspend/resume cycles" >> "$REPORT_FILE"
-echo "4. Thermal Management: Temperature spikes during gaming sessions" >> "$REPORT_FILE"
-echo "5. Filesystem Corruption: Orphaned inodes from improper shutdowns" >> "$REPORT_FILE"
-echo "" >> "$REPORT_FILE"
-echo "CRITICAL CORRELATION POINTS:" >> "$REPORT_FILE"
-echo "- Battery capacity vs crash frequency" >> "$REPORT_FILE"
-echo "- Gaming activity vs power delivery issues" >> "$REPORT_FILE"
-echo "- ITHC errors vs system freezes" >> "$REPORT_FILE"
-echo "- AC power state vs crash timing" >> "$REPORT_FILE"
-echo "- Thermal throttling vs performance drops" >> "$REPORT_FILE"
-
-# Final metadata summary
-add_json_metadata "final_summary" "
-  \"total_anomalies\": ${#ANOMALIES[@]},
-  \"report_sections\": 10,
-  \"analysis_timestamp\": \"$(date -Iseconds)\",
-  \"system_health_score\": $([ ${#ANOMALIES[@]} -eq 0 ] && echo "100" || echo "$((100 - ${#ANOMALIES[@]} * 12))"),
-  \"recommended_actions\": [\"battery_replacement\", \"ithc_monitoring\", \"power_management\"]"
-
-# Completion summary
-echo "" >> "$REPORT_FILE"
-echo "=================================================================================" >> "$REPORT_FILE"
-echo "  OPTIMIZED CRASH ANALYSIS COMPLETE" >> "$REPORT_FILE"
-echo "=================================================================================" >> "$REPORT_FILE"
-echo "Report generated: $(date)" >> "$REPORT_FILE"
-echo "Total sections analyzed: 10 (optimized from 12)" >> "$REPORT_FILE"
-echo "Anomalies detected: ${#ANOMALIES[@]}" >> "$REPORT_FILE"
-echo "Report size: $(wc -l < "$REPORT_FILE") lines" >> "$REPORT_FILE"
-echo "Report location: $REPORT_FILE" >> "$REPORT_FILE"
-
-# Set proper permissions
-sudo chown mattm:users "$REPORT_FILE" 2>/dev/null || true
-sudo chmod 644 "$REPORT_FILE" 2>/dev/null || true
-
-# Final output
-echo ""
-echo "=================================================================================="
-log_success "Optimized crash analysis completed!"
-echo "=================================================================================="
-echo "Report saved to: $REPORT_FILE"
-echo "Report size: $(du -h "$REPORT_FILE" | cut -f1)"
-echo "Anomalies detected: ${#ANOMALIES[@]}"
-echo ""
-echo "OPTIMIZATION IMPROVEMENTS:"
-echo "- Removed 2 irrelevant sections (Network, App crashes)"
-echo "- Enhanced battery health monitoring (critical for your crashes)"
-echo "- Added ITHC touch controller diagnostics"
-echo "- Prioritized power/battery analysis"
-echo "- Added filesystem corruption detection"
-echo "- Streamlined execution (~40% faster)"
-echo ""
-echo "KEY FINDINGS:"
-for anomaly in "${ANOMALIES[@]}"; do
-    echo "- $anomaly"
-done
-echo ""
-echo "NEXT STEPS:"
-echo "1. Review the report: less '$REPORT_FILE'"
-echo "2. Focus on battery health metrics (primary crash cause)"
-echo "3. Monitor ITHC driver messages for touch controller issues"
-echo "4. Check power state transition correlation with crashes"
+echo "--- End of Report ---"
