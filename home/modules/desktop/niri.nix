@@ -26,6 +26,7 @@ in
         "SSH_ASKPASS" = "/etc/nixos/home/modules/scripts/fuzzel-askpass";
         "SUDO_ASKPASS" = "/etc/nixos/home/modules/scripts/fuzzel-askpass";
         "SSH_ASKPASS_REQUIRE" = "force";
+				"TERMINAL" = "kitty";
       };
 
       # Auto-start xwayland-satellite for X11 application support
@@ -70,7 +71,8 @@ in
       # Keybindings
       binds = {
         # Application launcher and window management
-        "Mod+Space".action = actions.spawn "fuzzel";
+        "Mod+d".action = actions.spawn ["tofi-drun" "--drun-launch=true"];
+				"Mod+Space".action = actions.spawn "fuzzel";
         "Mod+Escape".action = actions.close-window;
 
         # Focus navigation
@@ -130,16 +132,17 @@ in
         # Wallpaper management
         "Mod+W".action = actions.spawn [
           "bash"
-          "/etc/nixos/home/modules/scripts/wallpaper"
+          "/etc/nixos/home/modules/scripts/bing-wallpaper"
         ];
-        "Mod+Shift+W".action = actions.spawn [
-          "bash"
-          "/etc/nixos/home/modules/scripts/wallpaper"
-          "new"
-        ];
+				#"Mod+Shift+W".action = actions.spawn [
+				#  "bash"
+				#  "/etc/nixos/home/modules/scripts/wallpaper"
+				#  "new"
+				#];
 
         # Screenshot
-        "Mod+S".action = actions.spawn [ "/etc/nixos/home/modules/scripts/screenshot-interactive" ];
+				#"Mod+S".action = actions.spawn [ "/etc/nixos/home/modules/scripts/screenshot-interactive" ];
+				"Mod+S".action = actions.screenshot;
 
         # OCR Screenshot - select area and extract text to clipboard
         "Mod+O".action = actions.spawn [ "/etc/nixos/home/modules/scripts/ocr-screenshot" ];
@@ -171,4 +174,21 @@ in
       main.icons-enabled = false;
     };
   };
+
+	programs.tofi = {
+		enable = true;
+		settings = {
+	  	anchor = "left";
+			margin-top = "20%";
+  		margin-left = "20%";
+			width = "60%";
+			height = "60%";
+			outline-width=1;
+			boarder-width=0;
+			corner-radius=25;
+			#			font-size=21;
+			num-results = 0;
+    	result-spacing = 4;
+		};
+	};
 }
