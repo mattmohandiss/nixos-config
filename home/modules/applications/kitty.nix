@@ -10,6 +10,7 @@
       
       # Enable better font rendering
       disable_ligatures = "never";
+      allow_remote_control = "yes";
       
     };
   };
