@@ -88,7 +88,6 @@ run_cmd "cat /proc/loadavg" "System load averages"
 add_section "POWER AND BATTERY ANALYSIS"
 run_cmd "acpi -V" "Complete ACPI power status"
 run_cmd "upower -i $(upower -e | grep 'BAT')" "Detailed battery health and status"
-run_cmd "cat /sys/class/power_supply/BAT*/cycle_count" "Battery cycle count"
 
 add_section "GRAPHICS AND WAYLAND ANALYSIS"
 run_cmd "journalctl -b -1 --no-pager | grep -i -E '(drm|i915|gpu|graphics)' | tail -15" "Graphics driver messages from previous boot"

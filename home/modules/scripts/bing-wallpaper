@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# Fetches and sets the Bing wallpaper of the day with copyright text.
+
+set -euo pipefail
+
+WALLPAPER_DIR="/etc/nixos/home/modules/wallpapers/bing"
+API_URL="https://bing.biturl.top/?resolution=UHD&format=json&index=random&mkt=en-US"
+
+notify() {
+    notify-send "Wallpaper" "$1" 2>/dev/null || true
+}
+
+# Create wallpaper directory if it doesn't exist
+mkdir -p "$WALLPAPER_DIR"
+
+# Get today's date for the filename
+TIMESTAMP=$(date '+%Y%m%d')
+WALLPAPER_FILE="$WALLPAPER_DIR/bing_$TIMESTAMP.jpg"
+
+# Start notification and capture its ID
+id=$(notify-send --print-id "Wallpaper" "Fetching Bing wallpaper of the day..." 2>/dev/null || echo "")
+
+# Fetch the wallpaper data from the API
+response=$(curl -s -L "$API_URL")
+
+# Extract the URL and copyright text
+image_url=$(echo "$response" | jq -r '.url')
+copyright_text=$(echo "$response" | jq -r '.copyright' | sed 's/ (©.*)//')
+
+# Download the image
+curl -s -L "$image_url" -o "$WALLPAPER_FILE"
+
+# Add the copyright text to the image
+magick "$WALLPAPER_FILE" \
+    -font "/nix/store/7pv1677zgv1lcrby4la5clqk7l7g9nlb-home-manager-path/share/fonts/truetype/NerdFonts/FiraCode/FiraCodeNerdFont-Regular.ttf" \
+    -gravity South \
+    -pointsize 36 \
+    -fill white \
+    -undercolor '#00000080' \
+		-annotate +0+5 " $copyright_text " \
+    "$WALLPAPER_FILE"
+
+# Set as current wallpaper
+swww img "$WALLPAPER_FILE" --resize crop --filter Lanczos3 \
+    --transition-type wipe --transition-duration 1 --transition-fps 60
+
+# Replace the original notification with a success message that auto-expires
+if [ -n "$id" ]; then
+    notify-send --replace-id=$id --expire-time=3000 "Wallpaper" "Bing wallpaper of the day has been set!" 2>/dev/null || true
+fi
+
+# Clean up old wallpapers, keeping the last 10
+find "$WALLPAPER_DIR" -name "bing_*.jpg" -type f -printf '%T@ %p\n' | \
+    sort -rn | tail -n +11 | cut -d' ' -f2- | xargs -r rm -f
