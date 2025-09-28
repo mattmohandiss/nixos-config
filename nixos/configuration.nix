@@ -14,6 +14,11 @@
     ./modules/gaming.nix
   ];
 
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+
   environment.systemPackages = with pkgs; [
     # Media libraries for MiniDLNA
     ffmpeg
