@@ -36,6 +36,8 @@
     # GPG for Git commit signing
     gnupg
     pinentry-gtk2
+    
+		fwupd
 
     godot
     blender
@@ -58,5 +60,8 @@
 
     # Rotation
     wlr-randr
+
+		zathura
+    lazygit
   ];
 }

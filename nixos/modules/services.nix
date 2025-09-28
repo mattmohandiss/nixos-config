@@ -1,6 +1,9 @@
 { config, pkgs, ... }:
 
 {
+  # Firmware update service
+  services.fwupd.enable = true;
+
   # MiniDLNA Media Server
   services.minidlna = {
     enable = true;
