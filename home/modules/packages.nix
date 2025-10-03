@@ -25,14 +25,12 @@
     microsoft-edge
     love
     zoom-us
-
-    # Nix development tools
-    nixd # Nix language server
-    nixfmt-rfc-style # Modern Nix formatter (RFC 166 style)
+    discord
 
     # Bun development tools
     bun # Fast JavaScript runtime and package manager
-    
+		nodejs
+
     # GPG for Git commit signing
     gnupg
     pinentry-gtk2
@@ -52,8 +50,6 @@
     
     # Directory environment management
     direnv
-
-    nodejs
 
     # On Screen Keyboard
     wvkbd
