@@ -54,7 +54,8 @@
       init.defaultBranch = "main";
       pull.rebase = true;
       push.default = "simple";
-      branch.autosetupmerge = "always";
+      push.autoSetupRemote = true;
+      remote.pushDefault = "origin";
       core.editor = "nvim";
       core.autocrlf = "input";
       # GPG signing configuration
