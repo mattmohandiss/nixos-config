@@ -23,6 +23,7 @@
       # Shell initialization
       initContent = ''
 				source ${../configs/zshrc}
+				source ${../scripts/dev-function.zsh}
 			'';
     };
 
