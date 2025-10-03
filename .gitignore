@@ -1,4 +1,5 @@
 .vscode
+.direnv
 home/modules/wallpapers
 result
 home/modules/mcp/**/node_modules/
