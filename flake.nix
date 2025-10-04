@@ -47,18 +47,20 @@
       makeDevShell =
         {
           name,
-          nixvim-lang-attrs ? { },
           extra-packages,
         }:
         let
-          base-config = (import ./home/modules/applications/neovim.nix).programs.nixvim;
-          final-config = pkgs.lib.recursiveUpdate base-config nixvim-lang-attrs;
-          cleaned-config = builtins.removeAttrs final-config [
+          base-config = ((import ./home/modules/applications/neovim.nix) { config = {}; pkgs = null; }).programs.nixvim;
+
+          # Remove home-manager specific attrs
+          base-config-cleaned = builtins.removeAttrs base-config [
             "enable"
             "viAlias"
             "vimAlias"
           ];
-          nixvim' = nixvim.legacyPackages.${system}.makeNixvim cleaned-config;
+
+          # Create nixvim package
+          nixvim' = nixvim.legacyPackages.${system}.makeNixvim base-config-cleaned;
         in
         pkgs.mkShell {
           name = "${name}-dev-shell";
