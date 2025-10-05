@@ -1,4 +1,4 @@
 { pkgs }: {
   name = "lua";
-  extra-packages = with pkgs; [ lua-language-server stylua ];
+  extra-packages = with pkgs; [ lua lua-language-server stylua ];
 }

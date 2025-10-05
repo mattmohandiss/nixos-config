@@ -3,15 +3,7 @@
 {
   imports = [ 
     ./hardware-configuration.nix
-    ./modules/boot.nix
-    ./modules/networking.nix
-    ./modules/audio.nix
-    ./modules/power.nix
-    ./modules/security.nix
-    ./modules/services.nix
-    ./modules/users.nix
-    ./modules/wayland.nix
-    ./modules/gaming.nix
+    ./modules/system
   ];
 
   hardware.bluetooth = {

@@ -26,22 +26,15 @@
   # Mako notification daemon (styled by stylix)
   services.mako = {
     enable = true;
-    defaultTimeout = 5000;
-    ignoreTimeout = true;
-    
-    # Position and basic settings
-    anchor = "top-right";
-    margin = "10";
-    borderRadius = 5;
-    
-    # Enable actions for interactive notifications
-    actions = true;
-    
-    # Custom configuration for screenshot notifications
-    extraConfig = ''
-      # Screenshot notification handling
-      [category=screenshot]
-      on-button-left=invoke-default-action
-    '';
+    settings = {
+      default-timeout = 5000;
+      ignore-timeout = true;
+      anchor = "top-right";
+      margin = "10";
+      border-radius = 5;
+      actions = true;
+      "[category=screenshot]" = {
+      };
+    };
   };
 }

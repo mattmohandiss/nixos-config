@@ -8,21 +8,7 @@
 {
   # Import all user-level configurations
   imports = [
-    ./modules/packages.nix
-    ./modules/services.nix
-    ./modules/xdg.nix
-    ./modules/mcp/configuration.nix
-    ./modules/desktop/niri.nix
-    ./modules/desktop/waybar.nix
-    ./modules/desktop/wallpaper.nix
-    ./modules/applications/firefox.nix
-    ./modules/applications/vscode.nix
-    ./modules/applications/kitty.nix
-    ./modules/applications/media.nix
-    ./modules/applications/zen-browser.nix
-    ./modules/applications/neovim.nix
-    ./modules/applications/zsh.nix
-    # Note: styling.nix excluded - handled at system level
+    ./modules/home
   ];
 
   # Home Manager core configuration
@@ -73,7 +59,7 @@
   services.gpg-agent = {
     enable = true;
     extraConfig = ''
-      pinentry-program /etc/nixos/home/modules/scripts/fuzzel-pinentry
+      pinentry-program /etc/nixos/modules/home/scripts/fuzzel-pinentry
     '';
     enableSshSupport = true;
   };

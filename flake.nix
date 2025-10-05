@@ -27,86 +27,55 @@
     };
   };
 
-  outputs =
-    {
-      self,
-      nixpkgs,
-      nixos-hardware,
-      home-manager,
-      stylix,
-      nur,
-      niri,
-      zen-browser,
-      nixvim,
-      ...
-    }@inputs:
+  outputs = { self, ... }@inputs:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
 
-      makeDevShell =
-        {
-          name,
-          extra-packages,
-        }:
-        let
-          base-config = ((import ./home/modules/applications/neovim.nix) { config = {}; pkgs = null; }).programs.nixvim;
-
-          # Remove home-manager specific attrs
-          base-config-cleaned = builtins.removeAttrs base-config [
-            "enable"
-            "viAlias"
-            "vimAlias"
-          ];
-
-          # Create nixvim package
-          nixvim' = nixvim.legacyPackages.${system}.makeNixvim base-config-cleaned;
-        in
+      makeDevShell = { name, extra-packages ? [] }:
         pkgs.mkShell {
           name = "${name}-dev-shell";
-          packages = [ nixvim' ] ++ extra-packages;
+          packages = extra-packages;
         };
 
     in
     {
-      nixosConfigurations."nixos" = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.nixos = inputs.nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
-          nixos-hardware.nixosModules.microsoft-surface-pro-intel
-          stylix.nixosModules.stylix
-          home-manager.nixosModules.home-manager
-          ./nixos/configuration.nix
+          ./configuration.nix
+          inputs.stylix.nixosModules.stylix
+          inputs.home-manager.nixosModules.home-manager
           {
             programs.direnv.enable = true;
             programs.direnv.nix-direnv.enable = true;
             nixpkgs.config.allowUnfree = true;
             nixpkgs.overlays = [
-              nur.overlays.default
-              niri.overlays.niri
+              inputs.nur.overlays.default
+              inputs.niri.overlays.niri
             ];
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              users.mattm = import ./home/default.nix;
               extraSpecialArgs = { inherit inputs; };
-              sharedModules = [
-                niri.homeModules.niri
-                zen-browser.homeModules.twilight
-                nixvim.homeManagerModules.nixvim
-              ];
+              users.mattm = {
+                imports = [
+                  inputs.niri.homeModules.niri
+                  inputs.zen-browser.homeModules.twilight
+                  inputs.nixvim.homeManagerModules.nixvim
+                  ./home.nix
+                ];
+              };
             };
           }
         ];
         specialArgs = { inherit inputs; };
       };
-      devShells."${system}" = {
-        default = makeDevShell ((import ./dev-shells/default.nix) { inherit pkgs; });
-        nix = makeDevShell ((import ./dev-shells/nix.nix) { inherit pkgs; });
-        python = makeDevShell ((import ./dev-shells/python.nix) { inherit pkgs; });
-        typescript = makeDevShell ((import ./dev-shells/typescript.nix) { inherit pkgs; });
-        haskell = makeDevShell ((import ./dev-shells/haskell.nix) { inherit pkgs; });
-        lua = makeDevShell ((import ./dev-shells/lua.nix) { inherit pkgs; });
-        go = makeDevShell ((import ./dev-shells/go.nix) { inherit pkgs; });
-      };
+      devShells."${system}" = let
+        shells = ["default" "nix" "python" "typescript" "haskell" "lua" "go"];
+      in inputs.nixpkgs.lib.genAttrs shells (name:
+        let config = import ./dev-shells/${name}.nix { inherit pkgs; };
+        in makeDevShell config
+      );
     };
 }

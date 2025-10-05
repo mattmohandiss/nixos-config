@@ -23,7 +23,6 @@ in
         "GIO_USE_VFS" = "local";
         "DISPLAY" = ":0";
         # Askpass configuration for fuzzel
-        "SSH_ASKPASS" = "/etc/nixos/home/modules/scripts/fuzzel-askpass";
         "SUDO_ASKPASS" = "/etc/nixos/home/modules/scripts/fuzzel-askpass";
         "SSH_ASKPASS_REQUIRE" = "force";
 				"TERMINAL" = "kitty";
@@ -132,20 +131,20 @@ in
         # Wallpaper management
         "Mod+W".action = actions.spawn [
           "bash"
-          "/etc/nixos/home/modules/scripts/bing-wallpaper"
+          "/etc/nixos/modules/home/scripts/bing-wallpaper"
         ];
 				#"Mod+Shift+W".action = actions.spawn [
 				#  "bash"
-				#  "/etc/nixos/home/modules/scripts/wallpaper"
+				#  "/etc/nixos/modules/home/scripts/wallpaper"
 				#  "new"
 				#];
 
         # Screenshot
-				#"Mod+S".action = actions.spawn [ "/etc/nixos/home/modules/scripts/screenshot-interactive" ];
+				#"Mod+S".action = actions.spawn [ "/etc/nixos/modules/home/scripts/screenshot-interactive" ];
 				"Mod+S".action = actions.screenshot;
 
         # OCR Screenshot - select area and extract text to clipboard
-        "Mod+O".action = actions.spawn [ "/etc/nixos/home/modules/scripts/ocr-screenshot" ];
+        "Mod+O".action = actions.spawn [ "/etc/nixos/modules/home/scripts/ocr-screenshot" ];
 
         # Temp Terminal
         "Mod+T".action = actions.spawn [

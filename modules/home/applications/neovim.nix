@@ -59,8 +59,8 @@
         gopls.enable = true;
         pyright.enable = true;
         ts_ls.enable = true;
-        hls.enable = true;
-        lua-ls.enable = true;
+        hls = { enable = true; installGhc = true; };
+        lua_ls.enable = true;
         nil_ls.enable = true;
       };
       mini.enable = true;
