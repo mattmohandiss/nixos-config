@@ -36,6 +36,7 @@
       branch.autosetupmerge = "always";
       core.editor = "nvim";
       core.autocrlf = "input";
+      credential.helper = "libsecret";
       # GPG signing configuration
       commit.gpgsign = true;
       user.signingkey = "381948BAC468E711";

@@ -44,35 +44,7 @@
     '';
   };
   
-  # Git configuration
-  programs.git = {
-    enable = true;
-    userName = "Matt Mohandiss";
-    userEmail = "mattmohandiss@gmail.com";
-    
-    extraConfig = {
-      init.defaultBranch = "main";
-      pull.rebase = true;
-      push.default = "simple";
-      push.autoSetupRemote = true;
-      remote.pushDefault = "origin";
-      core.editor = "nvim";
-      core.autocrlf = "input";
-      # GPG signing configuration
-      commit.gpgsign = true;
-      user.signingkey = "381948BAC468E711";
-    };
-    
-    aliases = {
-      st = "status";
-      co = "checkout";
-      br = "branch";
-      ci = "commit";
-      unstage = "reset HEAD --";
-      last = "log -1 HEAD";
-      visual = "!gitk";
-    };
-  };
+
 
   programs.gpg = {
     enable = true;
