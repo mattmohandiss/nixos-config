@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  # Swww wallpaper daemon service
+  # Swww wallpaper daemon service with unified wallpaper management
   systemd.user.services.swww = {
     Unit = {
       Description = "Swww wallpaper daemon";
@@ -10,8 +10,7 @@
     };
     Service = {
       ExecStart = "${pkgs.swww}/bin/swww-daemon";
-      # Try current.jpg first, fallback to any wallpaper in the directory
-      ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.swww}/bin/swww img /etc/nixos/home/modules/wallpapers/current.jpg'";
+      ExecStartPost = "${pkgs.bash}/bin/bash -c '/etc/nixos/modules/home/scripts/wallpaper load'";
       Restart = "on-failure";
       RestartSec = 1;
       TimeoutStopSec = 10;

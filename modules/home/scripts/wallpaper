@@ -1,83 +1,181 @@
 #!/usr/bin/env bash
 
-# Generate new or switch existing risograph wallpapers
+# Unified wallpaper manager for fetching and setting the Bing image of the day.
+#
+# Supports two commands:
+#   - load:   Loads the current wallpaper instantly and schedules a background
+#             update if the Bing wallpaper is from a previous day. Ideal for startup.
+#   - update: Forces an immediate fetch and update of the Bing wallpaper.
 
 set -euo pipefail
 
+# --- Configuration ---
 WALLPAPER_DIR="/etc/nixos/home/modules/wallpapers"
-API_URL="https://api.openai.com/v1/images/generations"
-MAX_WALLPAPERS=10
-PROMPT="A vibrant risograph-style landscape, with bold halftone textures and limited colors. Stylized with dramatic lighting and grainy print textures. High contrast, retro risograph aesthetic, suitable for a desktop wallpaper."
+BING_DIR="${WALLPAPER_DIR}/bing"
+CURRENT_WALLPAPER_SYMLINK="${WALLPAPER_DIR}/current.jpg"
+API_URL="https://bing.biturl.top/?resolution=UHD&format=json&index=random&mkt=en-US"
+MAX_WALLPAPERS_TO_KEEP=10
+FONT_PATH="/nix/store/7pv1677zgv1lcrby4la5clqk7l7g9nlb-home-manager-path/share/fonts/truetype/NerdFonts/FiraCode/FiraCodeNerdFont-Regular.ttf"
 
+# --- Helper Functions ---
+
+# Sends a desktop notification.
+# Usage: notify "Message" [notification_id_to_replace]
 notify() {
-    notify-send "Wallpaper" "$1" 2>/dev/null || true
-}
+    local message=$1
+    local id_to_replace=${2:-}
+    local extra_args=()
 
-generate_new() {
-    mkdir -p "$WALLPAPER_DIR"
-    
-    # Get API key and generate filename
-    API_KEY=$(secret-tool lookup service openai username dalle3)
-    TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
-    WALLPAPER_FILE="$WALLPAPER_DIR/dalle_$TIMESTAMP.jpg"
-    
-    # Start notification and capture its ID
-    id=$(notify-send --print-id "Wallpaper" "Generating new wallpaper..." 2>/dev/null || echo "")
-    
-    # Call DALL-E 3 API and download
-    curl -s -X POST "$API_URL" \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer $API_KEY" \
-        -d "{
-            \"model\": \"dall-e-3\",
-            \"prompt\": \"$PROMPT\",
-            \"n\": 1,
-            \"size\": \"1792x1024\",
-            \"quality\": \"hd\",
-            \"response_format\": \"url\"
-        }" | jq -r '.data[0].url' | xargs curl -s -o "$WALLPAPER_FILE"
-    
-    # Post-process: upscale to 4K and enhance
-    magick "$WALLPAPER_FILE" -resize 3840x2160^ -gravity center -extent 3840x2160 \
-        -contrast-stretch 2%x1% -modulate 100,115,100 -unsharp 0x1+1.0+0.05 \
-        "$WALLPAPER_FILE"
-    
-    # Set as current and apply
-    ln -sf "$WALLPAPER_FILE" "$WALLPAPER_DIR/current.jpg"
-    swww img "$WALLPAPER_FILE" --resize crop --filter Lanczos3 \
-        --transition-type wipe --transition-duration 1 --transition-fps 60
-    
-    # Cleanup old wallpapers
-    find "$WALLPAPER_DIR" -name "dalle_*.jpg" -type f -printf '%T@ %p\n' | \
-        sort -rn | tail -n +$((MAX_WALLPAPERS + 1)) | cut -d' ' -f2- | xargs -r rm -f
-    
-    # Replace the original notification with success message that auto-expires
-    if [ -n "$id" ]; then
-        notify-send --replace-id=$id --expire-time=3000 "Wallpaper" "New risograph landscape wallpaper generated!" 2>/dev/null || true
+    if [[ -n "$id_to_replace" ]]; then
+        extra_args+=("--replace-id=${id_to_replace}")
     fi
+
+    notify-send "Wallpaper" "${message}" "${extra_args[@]}" 2>/dev/null || true
 }
 
-switch_existing() {
-    # Find all wallpaper files (excluding current.jpg symlink)
-    mapfile -t WALLPAPERS < <(find "$WALLPAPER_DIR" -name "*.jpg" -o -name "*.png" | grep -v "current.jpg")
-    
-    if [ ${#WALLPAPERS[@]} -eq 0 ]; then
-        notify "No wallpapers found. Generate one first with 'wallpaper new'"
+# Sends a notification and prints the ID for later replacement.
+notify_and_get_id() {
+    notify-send --print-id "Wallpaper" "$1" 2>/dev/null || echo ""
+}
+
+# Sets the wallpaper using swww.
+# Usage: set_wallpaper /path/to/image [transition_duration]
+set_wallpaper() {
+    local wallpaper_path=$1
+    local transition_duration=${2:-1}
+    swww img "${wallpaper_path}" \
+        --resize crop \
+        --filter Lanczos3 \
+        --transition-type wipe \
+        --transition-duration "${transition_duration}" \
+        --transition-fps 60
+}
+
+# Checks if the Bing wallpaper needs to be updated.
+# Returns 0 (true) if no wallpaper exists for today's date.
+should_update() {
+    local today
+    today=$(date '+%Y%m%d')
+    # Check if a file like bing_20251006.jpg exists and is not zero-size.
+    if [[ -s "${BING_DIR}/bing_${today}.jpg" ]]; then
+        echo "Bing wallpaper for today already exists."
+        return 1 # 1 = false, no update needed
+    fi
+    return 0 # 0 = true, update is needed
+}
+
+# --- Core Logic ---
+
+# Fetches, processes, and sets the latest Bing wallpaper.
+update_bing_wallpaper() {
+    mkdir -p "${BING_DIR}"
+    local id
+    id=$(notify_and_get_id "Fetching new Bing wallpaper...")
+
+    # Fetch metadata from the API
+    local response
+    if ! response=$(curl -s -L "${API_URL}"); then
+        notify "Failed to fetch wallpaper metadata from API." "${id}"
+        return 1
+    fi
+
+    local image_url copyright_text
+    image_url=$(echo "${response}" | jq -r '.url')
+    copyright_text=$(echo "${response}" | jq -r '.copyright' | sed 's/ (©.*)//')
+
+    if [[ -z "${image_url}" || "${image_url}" == "null" ]]; then
+        notify "Could not find image URL in API response." "${id}"
+        return 1
+    fi
+
+    # Download the new wallpaper
+    local today
+    today=$(date '+%Y%m%d')
+    local new_wallpaper_file="${BING_DIR}/bing_${today}.jpg"
+    local temp_file
+    temp_file=$(mktemp)
+
+    if ! curl -s -L "${image_url}" -o "${temp_file}"; then
+        notify "Failed to download wallpaper image." "${id}"
+        rm -f "${temp_file}"
+        return 1
+    fi
+
+    # Add the copyright text to the image
+    if ! magick "${temp_file}" \
+        -font "${FONT_PATH}" \
+        -gravity South \
+        -pointsize 36 \
+        -fill white \
+        -undercolor '#00000080' \
+        -annotate +0+5 " ${copyright_text} " \
+        "${new_wallpaper_file}"; then
+        notify "Failed to add copyright text with ImageMagick." "${id}"
+        mv "${temp_file}" "${new_wallpaper_file}" # Move unconverted file as a fallback
+    fi
+    rm -f "${temp_file}"
+
+    # Update the 'current' symlink to point to the new wallpaper
+    ln -sf "${new_wallpaper_file}" "${CURRENT_WALLPAPER_SYMLINK}"
+    echo "Updated wallpaper to ${new_wallpaper_file}"
+
+    # Clean up old wallpapers, keeping the most recent ones
+    find "${BING_DIR}" -name "bing_*.jpg" -type f -printf '%T@ %p\n' |
+        sort -rn |
+        tail -n +$((MAX_WALLPAPERS_TO_KEEP + 1)) |
+        cut -d' ' -f2- |
+        xargs -r rm -f
+
+    notify "Bing wallpaper has been updated!" "${id}"
+}
+
+# Waits for the swww daemon and display outputs to be ready.
+wait_for_swww() {
+    local attempts=0
+    while ((attempts < 20)); do
+        if swww query >/dev/null 2>&1 && [[ $(swww query | wc -l) -gt 0 ]]; then
+            echo "swww daemon is ready."
+            return 0
+        fi
+        sleep 0.5
+        ((attempts++))
+    done
+    echo "Warning: swww daemon not ready after 10 seconds."
+    return 1
+}
+
+# --- Main Execution ---
+
+case "${1:-}" in
+    "load")
+        wait_for_swww
+        # Load the current wallpaper instantly for a fast startup
+        if [[ -e "${CURRENT_WALLPAPER_SYMLINK}" ]]; then
+            echo "Loading initial wallpaper: ${CURRENT_WALLPAPER_SYMLINK}"
+            set_wallpaper "${CURRENT_WALLPAPER_SYMLINK}" 0
+        else
+            echo "No current wallpaper found. Will attempt to update."
+        fi
+
+        # Check for an update in the background
+        if should_update; then
+            (
+                sleep 5 # Brief delay to let the system settle
+                if update_bing_wallpaper; then
+                    set_wallpaper "${CURRENT_WALLPAPER_SYMLINK}" 2
+                fi
+            ) & 
+        fi
+        ;;
+
+    "update")
+        if update_bing_wallpaper; then
+            set_wallpaper "${CURRENT_WALLPAPER_SYMLINK}" 2
+        fi
+        ;;
+
+    *)
+        echo "Usage: $0 {load|update}"
         exit 1
-    fi
-    
-    # Select random wallpaper
-    SELECTED_WALLPAPER="${WALLPAPERS[$RANDOM % ${#WALLPAPERS[@]}]}"
-    
-    # Update current wallpaper and apply
-    ln -sf "$SELECTED_WALLPAPER" "$WALLPAPER_DIR/current.jpg"
-    swww img "$SELECTED_WALLPAPER" --resize crop --filter Lanczos3 \
-        --transition-type fade --transition-duration 0.5 --transition-fps 60
-}
-
-# Main logic
-if [ "${1:-}" = "new" ]; then
-    generate_new
-else
-    switch_existing
-fi
+        ;;
+esac

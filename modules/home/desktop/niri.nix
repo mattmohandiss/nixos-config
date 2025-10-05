@@ -23,7 +23,7 @@ in
         "GIO_USE_VFS" = "local";
         "DISPLAY" = ":0";
         # Askpass configuration for fuzzel
-        "SUDO_ASKPASS" = "/etc/nixos/home/modules/scripts/fuzzel-askpass";
+        "SUDO_ASKPASS" = "/etc/nixos/modules/home/scripts/fuzzel-askpass";
         "SSH_ASKPASS_REQUIRE" = "force";
 				"TERMINAL" = "kitty";
       };
@@ -127,17 +127,6 @@ in
           "@DEFAULT_AUDIO_SINK@"
           "toggle"
         ];
-
-        # Wallpaper management
-        "Mod+W".action = actions.spawn [
-          "bash"
-          "/etc/nixos/modules/home/scripts/bing-wallpaper"
-        ];
-				#"Mod+Shift+W".action = actions.spawn [
-				#  "bash"
-				#  "/etc/nixos/modules/home/scripts/wallpaper"
-				#  "new"
-				#];
 
         # Screenshot
 				#"Mod+S".action = actions.spawn [ "/etc/nixos/modules/home/scripts/screenshot-interactive" ];
