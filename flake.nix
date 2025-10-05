@@ -44,6 +44,7 @@
         inherit system;
         modules = [
           ./configuration.nix
+          inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
           inputs.stylix.nixosModules.stylix
           inputs.home-manager.nixosModules.home-manager
           {

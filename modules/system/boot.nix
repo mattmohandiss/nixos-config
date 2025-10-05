@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  # Bootloader
+  # Bootloader (Microsoft Surface configuration handled by nixos-hardware)
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.memtest86.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -38,18 +38,15 @@
     "surface_kbd" # Surface keyboard driver
   ];
 
-
-  # Manual crash dump configuration (disable NixOS module to avoid aggressive panic settings)
+  # Crash dump configuration (disable NixOS module to avoid aggressive panic settings)
   boot.crashDump.enable = false;
 
-
+  # Kernel parameters optimized for Surface Pro
   boot.kernelParams = [
     "mem_sleep_default=deep" # Prefer deep sleep over s2idle
     "crashkernel=128M" # Reduced crash kernel memory reservation
     "panic=10" # Reboot after 10 seconds on panic (more time to see error)
-    # "oops=panic"          # DISABLED: Don't treat oops as panic (too aggressive)
     "panic_on_warn=0" # Don't panic on warnings
-    # "softlockup_panic=1"  # DISABLED: Don't panic on soft lockups (too sensitive)
     "nmi_watchdog=panic" # Only panic on NMI watchdog, not soft lockups
     "printk.devkmsg=on" # Enable /dev/kmsg for userspace logging
     "log_buf_len=1M" # Increase kernel log buffer size
