@@ -13,7 +13,7 @@ set -euo pipefail
 WALLPAPER_DIR="/etc/nixos/home/modules/wallpapers"
 BING_DIR="${WALLPAPER_DIR}/bing"
 CURRENT_WALLPAPER_SYMLINK="${WALLPAPER_DIR}/current.jpg"
-API_URL="https://bing.biturl.top/?resolution=UHD&format=json&index=random&mkt=en-US"
+API_URL="https://bing.biturl.top/?resolution=UHD&format=json&index=0&mkt=en-US"
 MAX_WALLPAPERS_TO_KEEP=10
 FONT_PATH="/nix/store/7pv1677zgv1lcrby4la5clqk7l7g9nlb-home-manager-path/share/fonts/truetype/NerdFonts/FiraCode/FiraCodeNerdFont-Regular.ttf"
 
@@ -52,16 +52,27 @@ set_wallpaper() {
 }
 
 # Checks if the Bing wallpaper needs to be updated.
-# Returns 0 (true) if no wallpaper exists for today's date.
+# Returns 0 (true) if no wallpaper exists for today, or if the existing one is stale.
 should_update() {
     local today
     today=$(date '+%Y%m%d')
-    # Check if a file like bing_20251006.jpg exists and is not zero-size.
-    if [[ -s "${BING_DIR}/bing_${today}.jpg" ]]; then
-        echo "Bing wallpaper for today already exists."
-        return 1 # 1 = false, no update needed
+    local today_wallpaper="${BING_DIR}/bing_${today}.jpg"
+
+    # 1. If no file for today exists at all, we must update.
+    if [[ ! -s "${today_wallpaper}" ]]; then
+        echo "No wallpaper for today found. Updating."
+        return 0 # 0 = true, update is needed
     fi
-    return 0 # 0 = true, update is needed
+
+    # 2. If a file exists, check if it was created/modified within the last 12 hours.
+    #    The Bing API can change its image of the day mid-day.
+    if find "${today_wallpaper}" -mtime -0.5 | grep -q .; then
+        echo "Found recent wallpaper for today. No update needed."
+        return 1 # 1 = false, no update needed
+    else
+        echo "Wallpaper for today seems stale (older than 12 hours). Re-fetching."
+        return 0 # 0 = true, update is needed
+    fi
 }
 
 # --- Core Logic ---

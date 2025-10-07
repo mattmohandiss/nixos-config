@@ -7,6 +7,7 @@
     ./applications/vscode.nix
     ./applications/zen-browser.nix
     ./applications/zsh.nix
+    #./configs/gemini.nix
     ./desktop/niri.nix
     ./desktop/styling.nix
     ./desktop/wallpaper.nix
