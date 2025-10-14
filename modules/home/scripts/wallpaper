@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # --- Configuration ---
-WALLPAPER_DIR="/etc/nixos/home/modules/wallpapers"
+WALLPAPER_DIR="/etc/nixos/wallpapers"
 BING_DIR="${WALLPAPER_DIR}/bing"
 CURRENT_WALLPAPER_SYMLINK="${WALLPAPER_DIR}/current.jpg"
 API_URL="https://bing.biturl.top/?resolution=UHD&format=json&index=0&mkt=en-US"
