@@ -35,7 +35,7 @@ dev() {
     done
 
     # 3. Spawn gemini window and resize to 33%
-    kitty --class "dev-gemini" gemini &> /dev/null &
+    kitty --class "dev-gemini" bun x @google/gemini-cli &> /dev/null &
     local gemini_win_id
     for i in {1..10}; do
         gemini_win_id=$(niri msg --json windows | jq --arg app_id "dev-gemini" -r '.[] | select(.app_id == $app_id) | .id')
@@ -46,7 +46,7 @@ dev() {
         fi
         sleep 0.2
     done
-
+    
     # 4. Re-focus the nvim window to start working
     if [ -n "$nvim_win_id" ]; then
         sleep 0.1 # Allow window events to settle before focusing
