@@ -24,11 +24,11 @@
         softrealtime = "on";
         reaper_freq = 3;
       };
-      gpu = {
-        apply_gpu_optimisations = "accept-responsibility";
-        gpu_device = 0;
-        amd_performance_level = "auto";
-      };
+      # gpu = {
+      #   apply_gpu_optimisations = "accept-responsibility";
+      #   gpu_device = 0;
+      #   amd_performance_level = "auto";
+      # };
       cpu = {
         park_cores = "no";
         pin_policy = "keep";
@@ -222,8 +222,8 @@
     linuxPackages.cpupower # CPU frequency utilities
   ];
 
-  # Add user to gamemode group for proper functionality
-  users.users.mattm.extraGroups = [ "gamemode" ];
+  # Add user to groups for proper graphics and gamemode functionality
+  users.users.mattm.extraGroups = [ "gamemode" "video" ];
 
   # Kernel modules for comprehensive thermal management
   boot.kernelModules = [ 

@@ -77,7 +77,7 @@ run_cmd "journalctl -b -1 --no-pager | grep -i -E '(error|fail|panic|crash|segfa
 run_cmd "journalctl -b -1 --no-pager | tail -100" "Previous boot final 100 log entries"
 
 add_section "APPLICATION CRASH ANALYSIS"
-run_cmd "coredumpctl list -b -1 --no-pager" "Application coredumps from previous boot"
+run_cmd "coredumpctl list -1 --no-pager" "Application coredumps from previous boot"
 
 add_section "HARDWARE HEALTH ANALYSIS"
 run_cmd "ras-mc-ctl --summary" "RAS daemon summary (CPU/Memory Errors)"

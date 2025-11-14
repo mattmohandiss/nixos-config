@@ -35,7 +35,7 @@
       makeDevShell = { name, extra-packages ? [] }:
         pkgs.mkShell {
           name = "${name}-dev-shell";
-          packages = extra-packages;
+          buildInputs = extra-packages;
         };
 
     in
