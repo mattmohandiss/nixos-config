@@ -1,0 +1,19 @@
+{
+  imports = [
+    ./applications/firefox.nix
+    ./applications/kitty.nix
+    ./applications/media.nix
+    ./applications/neovim.nix
+    ./applications/vscode.nix
+    ./applications/zen-browser.nix
+    ./applications/zsh.nix
+    ./desktop/styling.nix
+    ./desktop/wallpaper.nix
+    ./desktop/waybar.nix
+    ./desktop/niri.nix
+    ./mcp/configuration.nix
+    ./packages.nix
+    ./services.nix
+    ./xdg.nix
+  ];
+}

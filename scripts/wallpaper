@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+
+# Unified wallpaper manager for fetching and setting the Bing image of the day.
+#
+# Supports two commands:
+#   - load:   Loads the current wallpaper instantly and schedules a background
+#             update if the Bing wallpaper is from a previous day. Ideal for startup.
+#   - update: Forces an immediate fetch and update of the Bing wallpaper.
+
+set -euo pipefail
+
+# --- Configuration ---
+WALLPAPER_DIR="/etc/nixos/wallpapers"
+BING_DIR="${WALLPAPER_DIR}/bing"
+CURRENT_WALLPAPER_SYMLINK="${WALLPAPER_DIR}/current.jpg"
+API_URL="https://bing.biturl.top/?resolution=UHD&format=json&index=0&mkt=en-US"
+MAX_WALLPAPERS_TO_KEEP=10
+FONT_PATH="/nix/store/89q3pi7x44wwzp7jg3s0dsrvyj43giry-nerd-fonts-fira-code-3.4.0+6.2/share/fonts/truetype/NerdFonts/FiraCode/FiraCodeNerdFont-Medium.ttf"
+
+# --- Helper Functions ---
+
+# Sends a desktop notification.
+# Usage: notify "Message" [notification_id_to_replace]
+notify() {
+    local message=$1
+    local id_to_replace=${2:-}
+    local extra_args=()
+
+    if [[ -n "$id_to_replace" ]]; then
+        extra_args+=("--replace-id=${id_to_replace}")
+    fi
+
+    notify-send "Wallpaper" "${message}" "${extra_args[@]}" 2>/dev/null || true
+}
+
+# Sends a notification and prints the ID for later replacement.
+notify_and_get_id() {
+    notify-send --print-id "Wallpaper" "$1" 2>/dev/null || echo ""
+}
+
+# Sets the wallpaper using swww.
+# Usage: set_wallpaper /path/to/image [transition_duration]
+set_wallpaper() {
+    local wallpaper_path=$1
+    local transition_duration=${2:-1}
+    swww img "${wallpaper_path}" \
+        --resize crop \
+        --filter Lanczos3 \
+        --transition-type wipe \
+        --transition-duration "${transition_duration}" \
+        --transition-fps 60
+}
+
+# Checks if the Bing wallpaper needs to be updated.
+# Returns 0 (true) if no wallpaper exists for today, or if the existing one is stale.
+should_update() {
+    local today
+    today=$(date '+%Y%m%d')
+    local today_wallpaper="${BING_DIR}/bing_${today}.jpg"
+
+    # 1. If no file for today exists at all, we must update.
+    if [[ ! -s "${today_wallpaper}" ]]; then
+        echo "No wallpaper for today found. Updating."
+        return 0 # 0 = true, update is needed
+    fi
+
+    # 2. If a file exists, check if it was created/modified within the last 12 hours.
+    #    The Bing API can change its image of the day mid-day.
+    if find "${today_wallpaper}" -mtime -0.5 | grep -q .; then
+        echo "Found recent wallpaper for today. No update needed."
+        return 1 # 1 = false, no update needed
+    else
+        echo "Wallpaper for today seems stale (older than 12 hours). Re-fetching."
+        return 0 # 0 = true, update is needed
+    fi
+}
+
+# --- Core Logic ---
+
+# Fetches, processes, and sets the latest Bing wallpaper.
+update_bing_wallpaper() {
+    mkdir -p "${BING_DIR}"
+    local id
+    id=$(notify_and_get_id "Fetching new Bing wallpaper...")
+
+    # Fetch metadata from the API
+    local response
+    if ! response=$(curl -s -L "${API_URL}"); then
+        notify "Failed to fetch wallpaper metadata from API." "${id}"
+        return 1
+    fi
+
+    local image_url copyright_text
+    image_url=$(echo "${response}" | jq -r '.url')
+    copyright_text=$(echo "${response}" | jq -r '.copyright' | sed 's/ (©.*)//')
+
+    if [[ -z "${image_url}" || "${image_url}" == "null" ]]; then
+        notify "Could not find image URL in API response." "${id}"
+        return 1
+    fi
+
+    # Download the new wallpaper
+    local today
+    today=$(date '+%Y%m%d')
+    local new_wallpaper_file="${BING_DIR}/bing_${today}.jpg"
+    local temp_file
+    temp_file=$(mktemp)
+
+    if ! curl -s -L "${image_url}" -o "${temp_file}"; then
+        notify "Failed to download wallpaper image." "${id}"
+        rm -f "${temp_file}"
+        return 1
+    fi
+
+    # Add the copyright text to the image
+    if ! magick "${temp_file}" \
+        -font "${FONT_PATH}" \
+        -gravity South \
+        -pointsize 36 \
+        -fill white \
+        -undercolor '#00000080' \
+        -annotate +0+5 " ${copyright_text} " \
+        "${new_wallpaper_file}"; then
+        notify "Failed to add copyright text with ImageMagick." "${id}"
+        mv "${temp_file}" "${new_wallpaper_file}" # Move unconverted file as a fallback
+    fi
+    rm -f "${temp_file}"
+
+    # Update the 'current' symlink to point to the new wallpaper
+    ln -sf "${new_wallpaper_file}" "${CURRENT_WALLPAPER_SYMLINK}"
+    echo "Updated wallpaper to ${new_wallpaper_file}"
+
+    # Clean up old wallpapers, keeping the most recent ones
+    find "${BING_DIR}" -name "bing_*.jpg" -type f -printf '%T@ %p\n' |
+        sort -rn |
+        tail -n +$((MAX_WALLPAPERS_TO_KEEP + 1)) |
+        cut -d' ' -f2- |
+        xargs -r rm -f
+
+    notify "Bing wallpaper has been updated!" "${id}"
+}
+
+# Waits for the swww daemon and display outputs to be ready.
+wait_for_swww() {
+    local attempts=0
+    while ((attempts < 20)); do
+        if swww query >/dev/null 2>&1 && [[ $(swww query | wc -l) -gt 0 ]]; then
+            echo "swww daemon is ready."
+            return 0
+        fi
+        sleep 0.5
+        ((attempts++))
+    done
+    echo "Warning: swww daemon not ready after 10 seconds."
+    return 1
+}
+
+# --- Main Execution ---
+
+case "${1:-}" in
+    "load")
+        wait_for_swww
+        # Load the current wallpaper instantly for a fast startup
+        if [[ -e "${CURRENT_WALLPAPER_SYMLINK}" ]]; then
+            echo "Loading initial wallpaper: ${CURRENT_WALLPAPER_SYMLINK}"
+            set_wallpaper "${CURRENT_WALLPAPER_SYMLINK}" 0
+        else
+            echo "No current wallpaper found. Will attempt to update."
+        fi
+
+        # Check for an update in the background
+        if should_update; then
+            (
+                sleep 5 # Brief delay to let the system settle
+                if update_bing_wallpaper; then
+                    set_wallpaper "${CURRENT_WALLPAPER_SYMLINK}" 2
+                fi
+            ) & 
+        fi
+        ;;
+
+    "update")
+        if update_bing_wallpaper; then
+            set_wallpaper "${CURRENT_WALLPAPER_SYMLINK}" 2
+        fi
+        ;;
+
+    *)
+        echo "Usage: $0 {load|update}"
+        exit 1
+        ;;
+esac
