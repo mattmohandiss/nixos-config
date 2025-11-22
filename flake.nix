@@ -2,7 +2,6 @@
   inputs = {
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     nur = {
       url = "github:nix-community/NUR";
@@ -29,10 +28,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # stylix = {
-    #   url = "github:nix-community/stylix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 
   outputs =
@@ -46,8 +41,6 @@
         modules = [
           ./system
           ./user
-          # inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
-          # inputs.stylix.nixosModules.stylix
         ];
         specialArgs = { inherit inputs; };
       };

@@ -19,7 +19,7 @@
         inputs.zen-browser.homeModules.twilight
         inputs.nixvim.homeModules.nixvim
         ./home.nix
-        ./modules/default.nix
+        ./modules
       ];
     };
   };

@@ -1,8 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   home.packages = with pkgs; [
-    waybar
     fuzzel
     wl-clipboard
     brightnessctl

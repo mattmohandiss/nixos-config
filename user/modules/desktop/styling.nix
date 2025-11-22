@@ -33,7 +33,7 @@
       margin = "10";
       border-radius = 5;
       actions = true;
-      "[category=screenshot]" = { };
+      # per-category rules removed (produced invalid mako criteria)
     };
   };
 }

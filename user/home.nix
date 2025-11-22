@@ -6,9 +6,6 @@
 }:
 
 {
-  # Import all user-level configurations
-  imports = [ ./modules ];
-
   # Home Manager core configuration
   home.username = "mattm";
   home.homeDirectory = "/home/mattm";
@@ -60,4 +57,5 @@
     '';
     enableSshSupport = true;
   };
+
 }

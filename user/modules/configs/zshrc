@@ -1,2 +1,0 @@
-# This file is no longer used as zsh configuration has been moved back to Nix (modules/home/applications/zsh.nix)
-# Keeping it for reference in case any manual customizations are needed later.

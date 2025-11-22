@@ -25,7 +25,7 @@ in
       };
 
       # Auto-start xwayland-satellite for X11 application support
-      spawn-at-startup = [ { command = [ "xwayland-satellite" ]; } ];
+      spawn-at-startup = [ { command = [ "xwayland-satellite" ]; } { command = [ "/etc/nixos/pawbar/result/bin/pawbar" ]; } ];
 
       animations.enable = false;
 
