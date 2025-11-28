@@ -2,6 +2,20 @@
 
 {
 
+  # System-wide theming with Stylix
+  stylix = {
+    enable = true;
+    autoEnable = true;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+
+    fonts = {
+      monospace = {
+        package = pkgs.nerd-fonts.fira-code;
+        name = "FiraCode Nerd Font";
+      };
+    };
+  };
+
   services.iptsd.enable = true;
 
   # Firmware update service
@@ -34,7 +48,19 @@
       RateLimitBurst=10000
     '';
   };
-  hardware.rasdaemon.enable = true;
+
+  # hardware.rasdaemon.enable = true;
+
+  # # Give rasdaemon narrow access to tracefs and wait for instances
+  # # to appear. Preserve kernel protection flags and add only the
+  # # minimal ambient capability to help with trace operations.
+  # systemd.services.rasdaemon = {
+  #   serviceConfig = {
+  #     ReadWritePaths = "/sys/kernel/tracing /sys/kernel/debug/tracing/instances";
+  #     ExecStartPre = "/bin/sh -c 'until [ -d /sys/kernel/tracing/instances ] || [ -d /sys/kernel/debug/tracing/instances ]; do sleep 0.1; done'";
+  #   };
+  #   after = [ "systemd-modules-load.service" ];
+  # };
 
   # System coredump collection
   systemd.coredump = {

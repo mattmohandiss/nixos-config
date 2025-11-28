@@ -1,6 +1,5 @@
 {
   inputs = {
-
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nur = {
@@ -16,6 +15,7 @@
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs."nixpkgs-stable".follows = "nixpkgs";
     };
 
     zen-browser = {
@@ -28,21 +28,33 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs =
-    { self, ... }@inputs:
+  outputs = { self, nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
+      lib = nixpkgs.lib;
+
+       importDirRecursive = dir:
+        builtins.filter
+          (path: lib.hasSuffix ".nix" path)
+          (lib.filesystem.listFilesRecursive dir);
     in
     {
-      nixosConfigurations.nixos = inputs.nixpkgs.lib.nixosSystem {
+      nixosConfigurations.nixos = lib.nixosSystem {
         inherit system;
-        modules = [
-          ./system
-          ./user
-        ];
+
+        modules =
+          [ inputs.stylix.nixosModules.stylix ]
+          ++ importDirRecursive ./system
+          ++ [ ./user/default.nix ];
+
         specialArgs = { inherit inputs; };
       };
     };
 }
+

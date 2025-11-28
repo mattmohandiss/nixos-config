@@ -8,8 +8,13 @@ in
   programs.niri = {
     settings = {
       prefer-no-csd = true;
+
       # Disable hotkey overlay on startup
       hotkey-overlay.skip-at-startup = true;
+
+      input = {
+        power-key-handling.enable = false;
+      };
 
       # Environment variables for Wayland compatibility
       environment = {
@@ -25,7 +30,10 @@ in
       };
 
       # Auto-start xwayland-satellite for X11 application support
-      spawn-at-startup = [ { command = [ "xwayland-satellite" ]; } { command = [ "/etc/nixos/pawbar/result/bin/pawbar" ]; } ];
+      spawn-at-startup = [
+        { command = [ "xwayland-satellite" ]; }
+        { command = [ "/etc/nixos/pawbar/result/bin/pawbar" ]; }
+      ];
 
       animations.enable = false;
 

@@ -14,13 +14,23 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     extraSpecialArgs = { inherit inputs; };
-    users.mattm = {
-      imports = [
-        inputs.zen-browser.homeModules.twilight
-        inputs.nixvim.homeModules.nixvim
-        ./home.nix
-        ./modules
-      ];
-    };
+    # Back up any files Home Manager would overwrite when activating
+    backupFileExtension = ".bak";
+      users.mattm = {
+        imports = (
+          [
+            inputs.zen-browser.homeModules.twilight
+            inputs.nixvim.homeModules.nixvim
+            ./modules/home.nix
+            ./modules/applications
+            ./modules/development
+            ./modules/secrets
+            ./modules/web
+            ./modules/packages.nix
+            ./modules/services.nix
+            ./modules/xdg.nix
+          ]
+        );
+      };
   };
 }

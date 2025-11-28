@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Simple zenity-based askpass for SSH/Git
+PROMPT="${1:-Password: }"
+zenity --entry --title="Authentication required" --hide-text --text="$PROMPT" 2>/dev/null

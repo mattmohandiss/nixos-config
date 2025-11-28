@@ -3,6 +3,7 @@
 {
   home.packages = with pkgs; [
     fuzzel
+    zenity
     wl-clipboard
     brightnessctl
     pwvucontrol

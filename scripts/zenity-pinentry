@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+# Minimal pinentry protocol wrapper using zenity
+# Reads commands from gpg-agent and responds accordingly.
+
+DESCRIPTION=""
+PROMPT="PIN:"
+ERROR=""
+TITLE=""
+
+send_ok() {
+  echo "OK"
+}
+
+send_error() {
+  echo "ERR 83886179 Operation cancelled <Pinentry>"
+}
+
+get_password() {
+  local prompt_text="$PROMPT"
+  if [ -n "$DESCRIPTION" ]; then
+    prompt_text="$DESCRIPTION: $prompt_text"
+  fi
+  if [ -n "$ERROR" ]; then
+    prompt_text="$ERROR - $prompt_text"
+  fi
+  prompt_text=$(echo "$prompt_text" | sed 's/:*[[:space:]]*$//')
+  local password
+  password=$(zenity --entry --title="${TITLE:-Authentication required}" --hide-text --text="$prompt_text" 2>/dev/null)
+  if [ $? -eq 0 ] && [ -n "$password" ]; then
+    echo "D $password"
+    send_ok
+  else
+    send_error
+  fi
+}
+
+send_ok
+
+while IFS= read -r line; do
+  case "$line" in
+    "GETPIN")
+      get_password
+      ;;
+    "SETDESC "*)
+      DESCRIPTION="${line#SETDESC }"
+      send_ok
+      ;;
+    "SETPROMPT "*)
+      PROMPT="${line#SETPROMPT }"
+      send_ok
+      ;;
+    "SETERROR "*)
+      ERROR="${line#SETERROR }"
+      send_ok
+      ;;
+    "SETTITLE "*)
+      TITLE="${line#SETTITLE }"
+      send_ok
+      ;;
+    "OPTION "*)
+      send_ok
+      ;;
+    "BYE")
+      send_ok
+      exit 0
+      ;;
+    *)
+      send_ok
+      ;;
+  esac
+done

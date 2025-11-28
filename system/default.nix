@@ -7,8 +7,16 @@
 
 {
   imports = [
-    ./hardware-configuration.nix
-    ./modules
+    ./modules/hardware-configuration.nix
+    ./modules/audio.nix
+    ./modules/boot.nix
+    ./modules/gaming.nix
+    ./modules/networking.nix
+    ./modules/niri.nix
+    ./modules/power.nix
+    ./modules/security.nix
+    ./modules/services.nix
+    ./modules/users.nix
   ];
 
   hardware.bluetooth = {
@@ -19,6 +27,8 @@
   environment.systemPackages = with pkgs; [
     # Media libraries for MiniDLNA
     ffmpeg
+    pulseaudio
+    pavucontrol
     # Home Manager CLI tool
     home-manager
     # Modern CLI tools for zsh configuration
