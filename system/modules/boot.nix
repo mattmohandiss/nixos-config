@@ -2,11 +2,11 @@
 
 {
   # Bootloader (Microsoft Surface configuration handled by nixos-hardware)
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.memtest86.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
   boot = {
     loader = {
+      systemd-boot.enable = true;
+      systemd-boot.memtest86.enable = true;
+      efi.canTouchEfiVariables = true;
       efi.efiSysMountPoint = "/boot";
     };
     # Surface Pro 8 keyboard support for LUKS password entry

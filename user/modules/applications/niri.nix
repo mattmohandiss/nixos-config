@@ -65,7 +65,7 @@ in
         ];
       };
 
-      window-rules = [{ draw-border-with-background = false; }];
+      window-rules = [ { draw-border-with-background = false; } ];
 
       # Keybindings
       binds = {
@@ -134,7 +134,10 @@ in
         # Screenshot
         "Mod+S".action = actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" ];
         # Screenshot (raw PNG)
-        "Mod+Shift+S".action = actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" "--raw" ];
+        "Mod+Shift+S".action = actions.spawn [
+          "/etc/nixos/scripts/screenshot-interactive"
+          "--raw"
+        ];
 
         # OCR Screenshot - select area and extract text to clipboard
         "Mod+O".action = actions.spawn [ "/etc/nixos/scripts/ocr-screenshot" ];
