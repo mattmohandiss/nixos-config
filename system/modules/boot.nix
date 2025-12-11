@@ -14,8 +14,6 @@
       kernelModules = [
         "usbhid"
         "hid"
-        "hid_generic"
-        "i2c-hid"
       ];
       # Essential Surface modules for detachable keyboard during LUKS decryption
       availableKernelModules = [
