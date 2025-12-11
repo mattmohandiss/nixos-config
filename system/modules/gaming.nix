@@ -228,7 +228,6 @@
     "coretemp" # CPU temperature monitoring
     "acpi_cpufreq" # ACPI CPU frequency scaling
     "intel_powerclamp" # Power clamping for thermal control
-    "intel_rapl" # Intel RAPL power limiting
     "x86_pkg_temp_thermal" # Package temperature thermal driver
   ];
 }
