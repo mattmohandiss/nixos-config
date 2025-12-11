@@ -1,6 +1,5 @@
-{
-  config,
-  ...
+{ config
+, ...
 }:
 
 {
@@ -24,12 +23,14 @@
       pull.rebase = true;
       push.default = "simple";
       branch.autosetupmerge = "always";
-      core.editor = "nvim";
-      core.autocrlf = "input";
-       credential.helper = "libsecret";
-       core.askpass = "/etc/nixos/scripts/zenity-askpass";
-       commit.gpgsign = true;
-       user.signingkey = "381948BAC468E711";
+      core = {
+        editor = "nvim";
+        autocrlf = "input";
+        askpass = "/etc/nixos/scripts/zenity-askpass";
+      };
+      credential.helper = "libsecret";
+      commit.gpgsign = true;
+      user.signingkey = "381948BAC468E711";
     };
   };
 }

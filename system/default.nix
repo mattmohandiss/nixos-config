@@ -1,8 +1,7 @@
-{
-  config,
-  pkgs,
-  inputs,
-  ...
+{ config
+, pkgs
+, inputs
+, ...
 }:
 
 {
@@ -40,24 +39,24 @@
 
   # Note: gnome-keyring, libsecret, and nixfmt-rfc-style moved to user packages (mattm/packages.nix)
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-  nix.settings.download-buffer-size = 52428800;
-
-  # NIX_PATH for better nixd flake support
-  nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
-
-  # Automatic garbage collection
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      download-buffer-size = 52428800;
+      auto-optimise-store = true;
+    };
+    # NIX_PATH for better nixd flake support
+    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+    # Automatic garbage collection
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
   };
-
-  # Automatic store optimization
-  nix.settings.auto-optimise-store = true;
 
   programs.nix-ld.enable = true;
 

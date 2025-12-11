@@ -75,26 +75,30 @@
         lua_ls.enable = true;
         nil_ls.enable = true;
       };
-      mini.enable = true;
-      mini.modules.base16.palette = {
-        base00 = "#1d2021"; # Background
-        base01 = "#3c3836";
-        base02 = "#504945";
-        base03 = "#665c54";
-        base04 = "#bdae93";
-        base05 = "#d5c4a1";
-        base06 = "#ebdbb2";
-        base07 = "#fbf1c7";
-        base08 = "#fb4934"; # Red
-        base09 = "#fe8019"; # Orange
-        base0A = "#fabd2f"; # Yellow
-        base0B = "#b8bb26"; # Green
-        base0C = "#8ec07c"; # Aqua
-        base0D = "#83a598"; # Blue
-        base0E = "#d3869b"; # Purple
-        base0F = "#d65d0e"; # Brown
+      mini = {
+        enable = true;
+        modules.base16 = {
+          palette = {
+            base00 = "#1d2021"; # Background
+            base01 = "#3c3836";
+            base02 = "#504945";
+            base03 = "#665c54";
+            base04 = "#bdae93";
+            base05 = "#d5c4a1";
+            base06 = "#ebdbb2";
+            base07 = "#fbf1c7";
+            base08 = "#fb4934"; # Red
+            base09 = "#fe8019"; # Orange
+            base0A = "#fabd2f"; # Yellow
+            base0B = "#b8bb26"; # Green
+            base0C = "#8ec07c"; # Aqua
+            base0D = "#83a598"; # Blue
+            base0E = "#d3869b"; # Purple
+            base0F = "#d65d0e"; # Brown
+          };
+          use_cterm = true;
+        };
       };
-      mini.modules.base16.use_cterm = true;
     };
     keymaps = [
       {

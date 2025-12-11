@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 let
-  actions = config.lib.niri.actions;
+  inherit (config.lib.niri) actions;
 in
 {
   # Niri window manager configuration
@@ -65,7 +65,7 @@ in
         ];
       };
 
-      window-rules = [ { draw-border-with-background = false; } ];
+      window-rules = [{ draw-border-with-background = false; }];
 
       # Keybindings
       binds = {
@@ -160,27 +160,29 @@ in
   };
 
   # Application launcher configuration
-  programs.fuzzel = {
-    enable = true;
-    settings = {
-      main.icons-enabled = false;
+  programs = {
+    fuzzel = {
+      enable = true;
+      settings = {
+        main.icons-enabled = false;
+      };
     };
-  };
 
-  programs.tofi = {
-    enable = true;
-    settings = {
-      anchor = "left";
-      margin-top = "20%";
-      margin-left = "20%";
-      width = "60%";
-      height = "60%";
-      outline-width = 1;
-      boarder-width = 0;
-      corner-radius = 25;
-      #			font-size=21;
-      num-results = 0;
-      result-spacing = 4;
+    tofi = {
+      enable = true;
+      settings = {
+        anchor = "left";
+        margin-top = "20%";
+        margin-left = "20%";
+        width = "60%";
+        height = "60%";
+        outline-width = 1;
+        boarder-width = 0;
+        corner-radius = 25;
+        #			font-size=21;
+        num-results = 0;
+        result-spacing = 4;
+      };
     };
   };
 }

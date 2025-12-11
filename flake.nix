@@ -37,9 +37,9 @@
   outputs = { self, nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
-      lib = nixpkgs.lib;
+      inherit (nixpkgs) lib;
 
-       importDirRecursive = dir:
+      importDirRecursive = dir:
         builtins.filter
           (path: lib.hasSuffix ".nix" path)
           (lib.filesystem.listFilesRecursive dir);
@@ -54,6 +54,23 @@
           ++ [ ./user/default.nix ];
 
         specialArgs = { inherit inputs; };
+      };
+
+      devShells.${system} = {
+        default = nixpkgs.legacyPackages.${system}.mkShell {
+          buildInputs = with nixpkgs.legacyPackages.${system}; [
+            just
+            nixpkgs-fmt
+            statix
+            deadnix
+            nix-tree
+          ];
+
+          shellHook = ''
+            echo "🔧 NixOS Dev Shell loaded"
+            echo "   Run 'just describe' for available commands"
+          '';
+        };
       };
     };
 }

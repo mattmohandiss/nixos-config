@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 
 {
-
   # System-wide theming with Stylix
   stylix = {
     enable = true;
@@ -16,37 +15,36 @@
     };
   };
 
-  services.iptsd.enable = true;
-
-  # Firmware update service
-  services.fwupd.enable = true;
-
-  # MiniDLNA Media Server
-  services.minidlna = {
-    enable = true;
-    settings = {
-      friendly_name = "Matt's Laptop";
-      media_dir = [ "V,/srv/media" ];
-      port = 8200;
-      presentation_url = "http://192.168.68.0:8200/";
-      inotify = "yes";
-      enable_tivo = "no";
-      strict_dlna = "no"; # Better compatibility with various devices
-      force_sort_criteria = "+dc:title";
+  services = {
+    iptsd.enable = true;
+    # Firmware update service
+    fwupd.enable = true;
+    # MiniDLNA Media Server
+    minidlna = {
+      enable = true;
+      settings = {
+        friendly_name = "Matt's Laptop";
+        media_dir = [ "V,/srv/media" ];
+        port = 8200;
+        presentation_url = "http://192.168.68.0:8200/";
+        inotify = "yes";
+        enable_tivo = "no";
+        strict_dlna = "no"; # Better compatibility with various devices
+        force_sort_criteria = "+dc:title";
+      };
     };
-  };
-
-  # Enhanced logging and crash analysis services
-  services.journald = {
-    extraConfig = ''
-      Storage=persistent
-      MaxRetentionSec=30d
-      MaxFileSec=1week
-      Compress=yes
-      SplitMode=uid
-      RateLimitInterval=30s
-      RateLimitBurst=10000
-    '';
+    # Enhanced logging and crash analysis services
+    journald = {
+      extraConfig = ''
+        Storage=persistent
+        MaxRetentionSec=30d
+        MaxFileSec=1week
+        Compress=yes
+        SplitMode=uid
+        RateLimitInterval=30s
+        RateLimitBurst=10000
+      '';
+    };
   };
 
   # hardware.rasdaemon.enable = true;

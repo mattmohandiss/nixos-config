@@ -83,122 +83,122 @@
   };
 
   # Thermal management optimized for gaming performance (Surface Pro 8 appropriate)
-  services.thermald = {
-    enable = true;
-    debug = false;
-    configFile = pkgs.writeText "thermal-conf.xml" ''
-      <?xml version="1.0"?>
-      <ThermalConfiguration>
-        <Platform>
-          <Name>Surface Pro 8</Name>
-          <ProductName>*</ProductName>
-          <Preference>PERFORMANCE</Preference>
-          <ThermalZones>
-            <ThermalZone>
-              <Type>x86_pkg_temp</Type>
-              <TripPoints>
-                <TripPoint>
-                  <SensorType>x86_pkg_temp</SensorType>
-                  <Temperature>88000</Temperature>
-                  <type>passive</type>
-                  <CoolingDevice>
-                    <index>1</index>
-                    <type>intel_pstate</type>
-                    <influence>25</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                  <CoolingDevice>
-                    <index>2</index>
-                    <type>Fan</type>
-                    <influence>50</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                </TripPoint>
-                <TripPoint>
-                  <SensorType>x86_pkg_temp</SensorType>
-                  <Temperature>92000</Temperature>
-                  <type>passive</type>
-                  <CoolingDevice>
-                    <index>1</index>
-                    <type>intel_pstate</type>
-                    <influence>50</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                  <CoolingDevice>
-                    <index>2</index>
-                    <type>Fan</type>
-                    <influence>75</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                  <CoolingDevice>
-                    <index>3</index>
-                    <type>intel_powerclamp</type>
-                    <influence>25</influence>
-                    <SamplingPeriod>2</SamplingPeriod>
-                  </CoolingDevice>
-                </TripPoint>
-                <TripPoint>
-                  <SensorType>x86_pkg_temp</SensorType>
-                  <Temperature>96000</Temperature>
-                  <type>passive</type>
-                  <CoolingDevice>
-                    <index>1</index>
-                    <type>intel_pstate</type>
-                    <influence>75</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                  <CoolingDevice>
-                    <index>2</index>
-                    <type>Fan</type>
-                    <influence>100</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                  <CoolingDevice>
-                    <index>3</index>
-                    <type>intel_powerclamp</type>
-                    <influence>50</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                </TripPoint>
-                <TripPoint>
-                  <SensorType>x86_pkg_temp</SensorType>
-                  <Temperature>99000</Temperature>
-                  <type>passive</type>
-                  <CoolingDevice>
-                    <index>1</index>
-                    <type>intel_pstate</type>
-                    <influence>100</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                  <CoolingDevice>
-                    <index>2</index>
-                    <type>Fan</type>
-                    <influence>100</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                  <CoolingDevice>
-                    <index>3</index>
-                    <type>intel_powerclamp</type>
-                    <influence>75</influence>
-                    <SamplingPeriod>1</SamplingPeriod>
-                  </CoolingDevice>
-                </TripPoint>
-              </TripPoints>
-            </ThermalZone>
-          </ThermalZones>
-        </Platform>
-      </ThermalConfiguration>
-    '';
-  };
-
   # Enable power-profiles-daemon for better power management
   # Note: Allow hardware profile to handle auto-cpufreq, we complement with power-profiles-daemon
-  services.power-profiles-daemon.enable = true;
-
   # Fix GameMode GPU access permissions
-  services.udev.extraRules = ''
-    KERNEL=="card*", SUBSYSTEM=="drm", TAG+="uaccess"
-  '';
+  services = {
+    thermald = {
+      enable = true;
+      debug = false;
+      configFile = pkgs.writeText "thermal-conf.xml" ''
+        <?xml version="1.0"?>
+        <ThermalConfiguration>
+          <Platform>
+            <Name>Surface Pro 8</Name>
+            <ProductName>*</ProductName>
+            <Preference>PERFORMANCE</Preference>
+            <ThermalZones>
+              <ThermalZone>
+                <Type>x86_pkg_temp</Type>
+                <TripPoints>
+                  <TripPoint>
+                    <SensorType>x86_pkg_temp</SensorType>
+                    <Temperature>88000</Temperature>
+                    <type>passive</type>
+                    <CoolingDevice>
+                      <index>1</index>
+                      <type>intel_pstate</type>
+                      <influence>25</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                    <CoolingDevice>
+                      <index>2</index>
+                      <type>Fan</type>
+                      <influence>50</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                  </TripPoint>
+                  <TripPoint>
+                    <SensorType>x86_pkg_temp</SensorType>
+                    <Temperature>92000</Temperature>
+                    <type>passive</type>
+                    <CoolingDevice>
+                      <index>1</index>
+                      <type>intel_pstate</type>
+                      <influence>50</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                    <CoolingDevice>
+                      <index>2</index>
+                      <type>Fan</type>
+                      <influence>75</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                    <CoolingDevice>
+                      <index>3</index>
+                      <type>intel_powerclamp</type>
+                      <influence>25</influence>
+                      <SamplingPeriod>2</SamplingPeriod>
+                    </CoolingDevice>
+                  </TripPoint>
+                  <TripPoint>
+                    <SensorType>x86_pkg_temp</SensorType>
+                    <Temperature>96000</Temperature>
+                    <type>passive</type>
+                    <CoolingDevice>
+                      <index>1</index>
+                      <type>intel_pstate</type>
+                      <influence>75</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                    <CoolingDevice>
+                      <index>2</index>
+                      <type>Fan</type>
+                      <influence>100</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                    <CoolingDevice>
+                      <index>3</index>
+                      <type>intel_powerclamp</type>
+                      <influence>50</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                  </TripPoint>
+                  <TripPoint>
+                    <SensorType>x86_pkg_temp</SensorType>
+                    <Temperature>99000</Temperature>
+                    <type>passive</type>
+                    <CoolingDevice>
+                      <index>1</index>
+                      <type>intel_pstate</type>
+                      <influence>100</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                    <CoolingDevice>
+                      <index>2</index>
+                      <type>Fan</type>
+                      <influence>100</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                    <CoolingDevice>
+                      <index>3</index>
+                      <type>intel_powerclamp</type>
+                      <influence>75</influence>
+                      <SamplingPeriod>1</SamplingPeriod>
+                    </CoolingDevice>
+                  </TripPoint>
+                </TripPoints>
+              </ThermalZone>
+            </ThermalZones>
+          </Platform>
+        </ThermalConfiguration>
+      '';
+    };
+    power-profiles-daemon.enable = true;
+    udev.extraRules = ''
+      KERNEL=="card*", SUBSYSTEM=="drm", TAG+="uaccess"
+    '';
+  };
 
   # Hardware sensors for temperature monitoring
   hardware.sensor.iio.enable = true;

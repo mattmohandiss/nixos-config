@@ -2,10 +2,14 @@
 
 {
   # D-Bus and keyring services
-  services.dbus.enable = true;
-  services.dbus.packages = [ pkgs.nautilus ]; # For niri screen sharing
+  services = {
+    dbus = {
+      enable = true;
+      packages = [ pkgs.nautilus ]; # For niri screen sharing
+    };
+    gnome.gnome-keyring.enable = true;
+  };
   programs.dconf.enable = true;
-  services.gnome.gnome-keyring.enable = true;
 
   # Security and authentication
   security = {

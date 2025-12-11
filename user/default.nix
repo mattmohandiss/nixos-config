@@ -14,22 +14,20 @@
     extraSpecialArgs = { inherit inputs; };
     # Back up any files Home Manager would overwrite when activating
     backupFileExtension = ".bak";
-      users.mattm = {
-        imports = (
-          [
-            inputs.zen-browser.homeModules.twilight
-            inputs.nixvim.homeModules.nixvim
-            ./modules/home.nix
-            ./modules/applications
-            ./modules/development
-            ./modules/secrets
-            ./modules/shell
-            ./modules/web
-            ./modules/packages.nix
-            ./modules/services.nix
-            ./modules/xdg.nix
-          ]
-        );
-      };
+    users.mattm = {
+      imports = [
+        inputs.zen-browser.homeModules.twilight
+        inputs.nixvim.homeModules.nixvim
+        ./modules/home.nix
+        ./modules/applications
+        ./modules/development
+        ./modules/secrets
+        ./modules/shell
+        ./modules/web
+        ./modules/packages.nix
+        ./modules/services.nix
+        ./modules/xdg.nix
+      ];
+    };
   };
 }
