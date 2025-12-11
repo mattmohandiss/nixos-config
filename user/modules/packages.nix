@@ -31,6 +31,9 @@
     bun # Fast JavaScript runtime and package manager
     nodejs
 
+    zip
+    unzip
+
     # GPG for Git commit signing
     gnupg
     pinentry-gtk2

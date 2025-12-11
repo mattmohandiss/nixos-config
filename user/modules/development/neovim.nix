@@ -17,7 +17,7 @@
       autoindent = true;
     };
     plugins = {
-      #lualine.enable = true;
+      lualine.enable = true;
       bufferline.enable = true;
       gitsigns.enable = true;
       "indent-blankline".enable = true;

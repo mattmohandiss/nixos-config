@@ -3,8 +3,6 @@
 {
   imports = [ inputs.home-manager.nixosModules.home-manager ];
 
-  programs.direnv.enable = true;
-  programs.direnv.nix-direnv.enable = true;
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
     inputs.nur.overlays.default
@@ -25,6 +23,7 @@
             ./modules/applications
             ./modules/development
             ./modules/secrets
+            ./modules/shell
             ./modules/web
             ./modules/packages.nix
             ./modules/services.nix

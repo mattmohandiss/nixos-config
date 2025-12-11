@@ -1,42 +1,60 @@
 #!/usr/bin/env bash
 
-# Interactive screenshot script - handles everything in one place
-# Takes screenshot, copies to clipboard, and creates interactive notification
+# Streamlined screenshot script
+# - Saves a tidy PNG to /tmp
+# - By default copies the file path to the clipboard (text/plain) so keyboard paste works
+# - Use --raw to copy raw image bytes (image/png) instead
+# - Prints short timestamped logs to the console
 
 set -euo pipefail
 
-# Generate timestamped filename
-file="/tmp/screenshot-$(date +%F-%T).png"
+log() {
+  printf '%s %s\n' "$(date --iso-8601=seconds)" "$*"
+}
 
-# Take screenshot with area selection
+# Parse optional flag
+raw=0
+if [ "${1:-}" = "--raw" ]; then
+  raw=1
+fi
+
+# Tidy timestamped filename in /tmp
+file="/tmp/screenshot-$(date +%F_%H-%M-%S).png"
+log "Starting screenshot -> $file (pid $$ user $(id -un))"
+
+# Capture area
 if ! grim -g "$(slurp)" "$file"; then
-    notify-send "Screenshot Failed" "Could not take screenshot" --icon=dialog-error
-    exit 1
+  log "grim/slurp failed"
+  notify-send "Screenshot Failed" "Could not take screenshot" --icon=dialog-error
+  exit 1
 fi
 
-# Copy image to clipboard with proper MIME type
-if ! wl-copy --type image/png < "$file"; then
-    notify-send "Screenshot Saved" "File: $(basename "$file")\nWarning: Could not copy to clipboard" --icon=camera-photo
-    exit 1
-fi
+size=$(stat -c%s "$file" 2>/dev/null || echo 0)
+log "Saved screenshot $file (size: ${size} bytes)"
 
-# Create notification and handle action in background
+# Notify (non-blocking)
 filename=$(basename "$file")
+notify-send "Screenshot Saved" "$filename" --icon=camera-photo --category=screenshot --expire-time=4000 &
 
-# Send notification and capture the action response
-action_response=$(notify-send \
-    "Screenshot Saved" \
-    "File: $filename\nPath: $file\n\nClick to copy path to clipboard" \
-    --icon=camera-photo \
-    --category=screenshot \
-    --expire-time=10000 \
-    --action="copy-path=Copy Path to Clipboard" \
-    --wait)
+# Default behavior: copy path so Ctrl+Shift+V inserts the file path into apps like opencode
+if [ "$raw" -eq 1 ]; then
+  if wl-copy --type image/png < "$file"; then
+    log "wl-copy image/png success"
+    notify-send "Screenshot Saved" "PNG placed on clipboard" --icon=camera-photo --expire-time=2000 &
+  else
+    log "wl-copy image/png failed"
+    notify-send "Screenshot Saved" "Saved: $filename (could not copy raw PNG)" --icon=camera-photo --expire-time=2000 &
+  fi
+else
+  if echo -n "$file" | wl-copy --type 'text/plain;charset=utf-8'; then
+    log "wl-copy text/plain success"
+  else
+    log "wl-copy text/plain failed"
+    notify-send "Screenshot Saved" "Saved: $filename (could not copy path to clipboard)" --icon=camera-photo --expire-time=2000 &
+  fi
+fi
 
-# Handle the action response
-if [ "$action_response" = "copy-path" ]; then
-    echo -n "$file" | wl-copy
-    notify-send "Path Copied" "File path copied to clipboard" --icon=edit-copy --expire-time=2000
-fi &
+log "Done: $file"
 
 echo "Screenshot saved: $file"
+

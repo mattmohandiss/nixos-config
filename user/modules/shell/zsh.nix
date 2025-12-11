@@ -8,16 +8,6 @@
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
 
-    shellAliases = {
-      ls = "eza --group-directories-first --icons";
-      ll = "ls -lh";
-      la = "ls -la";
-      cat = "bat";
-      grep = "rg";
-      find = "fd";
-      gs = "git status -sb";
-    };
-
     initContent = ''
       setopt AUTO_CD
       setopt AUTO_PUSHD
@@ -51,11 +41,6 @@
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
-  };
-
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
   };
 
   programs.eza.enable = true;

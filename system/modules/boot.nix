@@ -5,11 +5,12 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.memtest86.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.efi.efiSysMountPoint = "/boot";
 
   # Surface Pro 8 keyboard support for LUKS password entry
   boot.initrd.kernelModules = [
-    "hid"
     "usbhid"
+    "hid"
     "hid_generic"
     "i2c-hid"
   ];
