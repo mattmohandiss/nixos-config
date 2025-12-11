@@ -11,7 +11,11 @@
       # Enable better font rendering
       disable_ligatures = "never";
       allow_remote_control = "yes";
-
+    };
+    keybindings = {
+      # System clipboard copy/paste - following Ctrl-based hierarchy
+      "ctrl+shift+c" = "copy_to_clipboard";
+      "ctrl+shift+v" = "paste_from_clipboard";
     };
   };
 }

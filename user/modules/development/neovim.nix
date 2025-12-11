@@ -38,7 +38,7 @@
             "<CR>" = "cmp.mapping.confirm({ select = true })";
             "<Tab>" = "cmp.mapping.select_next_item()";
             "<S-Tab>" = "cmp.mapping.select_prev_item()";
-            "<A-Tab>" = "cmp.mapping.complete()";
+            "<C-Tab>" = "cmp.mapping.complete()";
           };
           sources = [
             { name = "nvim_lsp"; }
@@ -130,62 +130,62 @@
         options.desc = "Help";
       }
       {
-        key = "<A-Space>";
+        key = "<C-Space>";
         action = {
           __raw = "require('telescope.builtin').find_files";
         };
-        options.desc = "Find files (Alt+Space)";
+        options.desc = "Find files (Ctrl+Space)";
       }
       {
-        key = "<A-Right>";
+        key = "<C-Right>";
         action = ":BufferLineCycleNext<CR>";
         mode = "n";
         options.silent = true;
       }
       {
-        key = "<A-Left>";
+        key = "<C-Left>";
         action = ":BufferLineCyclePrev<CR>";
         mode = "n";
         options.silent = true;
       }
       {
-        key = "<A-S-Left>";
+        key = "<C-S-Left>";
         action = ":BufferLineMovePrev<CR>";
         mode = "n";
         options.silent = true;
       }
       {
-        key = "<A-S-Right>";
+        key = "<C-S-Right>";
         action = ":BufferLineMoveNext<CR>";
         mode = "n";
         options.silent = true;
       }
       {
-        key = "<A-Escape>";
+        key = "<C-Escape>";
         action = ":bdelete<CR>";
         mode = "n";
         options.silent = true;
       }
       {
-        key = "<A-c>";
+        key = "<C-S-c>";
         action = ''"+y'';
         mode = "v";
         options.silent = true;
       }
       {
-        key = "<A-c>";
+        key = "<C-S-c>";
         action = ''"+yy'';
         mode = "n";
         options.silent = true;
       }
       {
-        key = "<A-v>";
+        key = "<C-S-v>";
         action = ''"+p'';
         mode = "n";
         options.silent = true;
       }
       {
-        key = "<A-v>";
+        key = "<C-S-v>";
         action = "<C-r>+";
         mode = "i";
         options.silent = true;
