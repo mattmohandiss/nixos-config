@@ -1,16 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  ...
-}:
-
-{
+{ config
+, pkgs
+, inputs
+, ...
+}: {
   imports = [
-    ./modules/hardware-configuration.nix
     ./modules/audio.nix
     ./modules/boot.nix
     ./modules/gaming.nix
+    ./modules/hardware-configuration.nix
     ./modules/networking.nix
     ./modules/niri.nix
     ./modules/power.nix

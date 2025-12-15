@@ -17,7 +17,7 @@
     users.mattm = {
       imports = [
         inputs.zen-browser.homeModules.twilight
-        inputs.nixvim.homeModules.nixvim
+        inputs.nvf.homeManagerModules.default
         ./modules/home.nix
         ./modules/applications
         ./modules/development

@@ -60,6 +60,7 @@
       "printk.devkmsg=on" # Enable /dev/kmsg for userspace logging
       "log_buf_len=1M" # Increase kernel log buffer size
       "loglevel=4" # Set appropriate log level (KERN_WARNING and above)
+      "i915.enable_psr=0" # Disable Panel Self Refresh to prevent flickering
     ];
   };
 }

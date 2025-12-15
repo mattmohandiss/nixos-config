@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nur = {
       url = "github:nix-community/NUR";
@@ -23,8 +23,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixvim = {
-      url = "github:nix-community/nixvim";
+    nvf = {
+      url = "github:notashelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -38,39 +38,19 @@
     let
       system = "x86_64-linux";
       inherit (nixpkgs) lib;
-
-      importDirRecursive = dir:
-        builtins.filter
-          (path: lib.hasSuffix ".nix" path)
-          (lib.filesystem.listFilesRecursive dir);
     in
     {
       nixosConfigurations.nixos = lib.nixosSystem {
         inherit system;
 
         modules =
-          [ inputs.stylix.nixosModules.stylix ]
-          ++ importDirRecursive ./system
-          ++ [ ./user/default.nix ];
-
-        specialArgs = { inherit inputs; };
-      };
-
-      devShells.${system} = {
-        default = nixpkgs.legacyPackages.${system}.mkShell {
-          buildInputs = with nixpkgs.legacyPackages.${system}; [
-            just
-            nixpkgs-fmt
-            statix
-            deadnix
-            nix-tree
+          [
+            ./system
+            ./user
+            inputs.stylix.nixosModules.stylix
           ];
 
-          shellHook = ''
-            echo "🔧 NixOS Dev Shell loaded"
-            echo "   Run 'just describe' for available commands"
-          '';
-        };
+        specialArgs = { inherit inputs; };
       };
     };
 }

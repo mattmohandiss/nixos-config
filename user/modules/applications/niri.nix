@@ -65,7 +65,7 @@ in
         ];
       };
 
-      window-rules = [ { draw-border-with-background = false; } ];
+      window-rules = [{ draw-border-with-background = false; }];
 
       # Keybindings
       binds = {
