@@ -10,11 +10,13 @@ return {
 					border = "rounded",
 					box = "vertical",
 
-					-- size
-					width = 0.8,
-					--min_width = 80,
-					height = 0.8,
-					--min_height = 15,
+                    -- size: use percentages for responsiveness but provide
+                    -- integer minimums so snacks doesn't compute a fractional
+                    -- window height that Neovim rejects.
+                    width = 0.8,
+                    min_width = 60,
+                    height = 0.8,
+                    min_height = 10,
 
 					-- center it
 					--row = 0.2,
@@ -23,9 +25,9 @@ return {
 					title = "{title} {live} {flags}",
 					title_pos = "center",
 
-					{ win = "input", height = 1, border = "bottom" },
-					{ win = "list", border = "none" },
-					{ win = "preview", title = "{preview}", height = 0.45, border = "top" },
+                    { win = "input", height = 1, border = "bottom" },
+                    { win = "list", border = "none" },
+                    { win = "preview", title = "{preview}", height = 0.45, min_height = 8, border = "top" },
 				},
 			},
 
