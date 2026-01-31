@@ -10,12 +10,12 @@ return {
 					border = "rounded",
 					box = "vertical",
 
-                    -- size: use percentages for responsiveness but provide
-                    -- integer minimums so snacks doesn't compute a fractional
-                    -- window height that Neovim rejects.
-                    width = 0.8,
+                    -- size: use absolute integer dimensions to avoid any
+                    -- fractional height/width calculations that Neovim rejects.
+                    -- These are reasonable defaults you can tune to taste.
+                    width = 80,
                     min_width = 60,
-                    height = 0.8,
+                    height = 30,
                     min_height = 10,
 
 					-- center it
@@ -27,7 +27,7 @@ return {
 
                     { win = "input", height = 1, border = "bottom" },
                     { win = "list", border = "none" },
-                    { win = "preview", title = "{preview}", height = 0.45, min_height = 8, border = "top" },
+                    { win = "preview", title = "{preview}", height = 15, min_height = 8, border = "top" },
 				},
 			},
 
