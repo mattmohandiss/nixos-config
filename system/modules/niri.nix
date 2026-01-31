@@ -35,11 +35,11 @@
   xdg.portal.config.common.default = "*"; # Fix portal warning
 
   # XWayland support for X11 applications like Steam
-  environment.systemPackages = with pkgs; [ ];
+  environment.systemPackages = with pkgs; [ xwayland-satellite ];
 
   # Keyboard layout
   services.xserver.xkb = {
-    layout = "us";
+    layout = "dk";
     variant = "";
   };
 }

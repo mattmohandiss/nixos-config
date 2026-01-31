@@ -18,6 +18,7 @@
       imports = [
         inputs.zen-browser.homeModules.twilight
         inputs.nvf.homeManagerModules.default
+        ./modules/dotfiles.nix
         ./modules/home.nix
         ./modules/applications
         ./modules/development

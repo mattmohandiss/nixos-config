@@ -1,4 +1,5 @@
-{ config
+{ lib
+, config
 , pkgs
 , inputs
 , ...
@@ -29,5 +30,4 @@
       };
     };
   };
-
 }

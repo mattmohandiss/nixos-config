@@ -1,0 +1,33 @@
+return {}
+-- return {
+--   "nvim-neo-tree/neo-tree.nvim",
+--   branch = "v3.x",
+--   dependencies = {
+--     "nvim-lua/plenary.nvim",
+--     "MunifTanjim/nui.nvim",
+--     "nvim-tree/nvim-web-devicons",
+--   },
+--   lazy = false,
+--   keys = {
+--     --{ "<C-Space>", ":Neotree filesystem toggle<CR>", desc = "Toggle Neo-tree" },
+--   },
+--   ---@module 'neo-tree'
+--   ---@type neotree.Config
+--   opts = {
+--     popup_border_style = "",
+--     window = {
+--       position = "float",
+--       popup = {
+--         title = "",
+--         size = { height = "80%", width = "50%" },
+--         position = "50%",
+--       },
+--     },
+--     filesystem = {
+--       filtered_items = {
+--         visible = true,
+--         hide_dotfiles = false,
+--       },
+--     },
+--   }
+-- }

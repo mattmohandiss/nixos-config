@@ -62,5 +62,7 @@
 
     zathura
     lazygit
+
+		just
   ];
 }

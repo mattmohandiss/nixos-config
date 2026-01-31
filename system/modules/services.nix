@@ -96,6 +96,8 @@
 
     # Memory testing
     memtester
+
+    surface-control
   ];
 
   # Create directories with proper permissions
