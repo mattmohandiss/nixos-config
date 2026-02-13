@@ -57,6 +57,6 @@
   };
 
   # Place eduroam CA cert into /etc/ssl/certs so NetworkManager can use it
-  # Source path is repository-relative: ./eduroam.pem
-  environment.etc."ssl/certs/eduroam.pem".source = ./eduroam.pem;
+  # Source path is repository-relative to this module file
+  environment.etc."ssl/certs/eduroam.pem".source = ../eduroam.pem;
 }
