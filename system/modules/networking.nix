@@ -27,12 +27,16 @@
       ];
     };
 
-    # Declarative NetworkManager connections
-    networkmanager.connections = [
-      {
-        id = "eduroam";
-        type = "wifi";
-        autoconnect = true;
+    # Declarative NetworkManager profile for eduroam (PEAP/MSCHAPv2).
+    # The secret (password) is intentionally omitted so NetworkManager will
+    # prompt and store it in GNOME Keyring (recommended).
+    networkmanager.ensureProfiles.profiles = {
+      eduroam = {
+        connection = {
+          id = "eduroam";
+          type = "wifi";
+          permissions = "";
+        };
 
         wifi = {
           ssid = "eduroam";
@@ -41,15 +45,15 @@
         };
 
         "802-1x" = {
-          eap = [ "peap" ];
+          eap = "peap";
           identity = "your.full.username@domain"; # replace with your real identity
           "anonymous-identity" = "anonymous@ku.dk";
           "phase2-auth" = "mschapv2";
           "ca-cert" = "/etc/ssl/certs/eduroam.pem";
-          "altsubject-matches" = [ "DNS:radius.ku.dk" ];
+          "altsubject-matches" = "DNS:radius.ku.dk";
         };
-      }
-    ];
+      };
+    };
   };
 
   # Place eduroam CA cert into /etc/ssl/certs so NetworkManager can use it
