@@ -1,9 +1,7 @@
 { config, pkgs, ... }:
 
-let
-  inherit (config.lib.niri) actions;
-in
-{
+let inherit (config.lib.niri) actions;
+in {
   # Niri window manager configuration
   programs.niri = {
     settings = {
@@ -12,9 +10,7 @@ in
       # Disable hotkey overlay on startup
       hotkey-overlay.skip-at-startup = true;
 
-      input = {
-        power-key-handling.enable = false;
-      };
+      input = { power-key-handling.enable = false; };
 
       # Environment variables for Wayland compatibility
       environment = {
@@ -65,15 +61,26 @@ in
         ];
       };
 
-      window-rules = [{ draw-border-with-background = false; }];
+      window-rules = [
+        { draw-border-with-background = false; }
+        {
+          matches = [{ app-id = "love"; }];
+
+          # ensure it goes into floating layout
+          tiled-state = false;
+
+          default-floating-position = {
+            relative-to = "top-right";
+            x = 50; # 50px from right edge
+            y = 50; # 50px from top edge
+          };
+        }
+      ];
 
       # Keybindings
       binds = {
         # Application launcher and window management
-        "Mod+d".action = actions.spawn [
-          "tofi-drun"
-          "--drun-launch=true"
-        ];
+        "Mod+d".action = actions.spawn [ "tofi-drun" "--drun-launch=true" ];
         "Mod+Space".action = actions.spawn "fuzzel";
         "Mod+Escape".action = actions.close-window;
 
@@ -100,53 +107,31 @@ in
         "Mod+F".action = actions.maximize-column;
 
         # Hardware controls - brightness
-        "Mod+XF86AudioRaiseVolume".action = actions.spawn [
-          "brightnessctl"
-          "set"
-          "+5%"
-        ];
-        "Mod+XF86AudioLowerVolume".action = actions.spawn [
-          "brightnessctl"
-          "set"
-          "5%-"
-        ];
+        "Mod+XF86AudioRaiseVolume".action =
+          actions.spawn [ "brightnessctl" "set" "+5%" ];
+        "Mod+XF86AudioLowerVolume".action =
+          actions.spawn [ "brightnessctl" "set" "5%-" ];
 
         # Hardware controls - audio
-        "XF86AudioRaiseVolume".action = actions.spawn [
-          "wpctl"
-          "set-volume"
-          "@DEFAULT_AUDIO_SINK@"
-          "1%+"
-        ];
-        "XF86AudioLowerVolume".action = actions.spawn [
-          "wpctl"
-          "set-volume"
-          "@DEFAULT_AUDIO_SINK@"
-          "1%-"
-        ];
-        "XF86AudioMute".action = actions.spawn [
-          "wpctl"
-          "set-mute"
-          "@DEFAULT_AUDIO_SINK@"
-          "toggle"
-        ];
+        "XF86AudioRaiseVolume".action =
+          actions.spawn [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "1%+" ];
+        "XF86AudioLowerVolume".action =
+          actions.spawn [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "1%-" ];
+        "XF86AudioMute".action =
+          actions.spawn [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
 
         # Screenshot
-        "Mod+S".action = actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" ];
+        "Mod+S".action =
+          actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" ];
         # Screenshot (raw PNG)
-        "Mod+Shift+S".action = actions.spawn [
-          "/etc/nixos/scripts/screenshot-interactive"
-          "--raw"
-        ];
+        "Mod+Shift+S".action =
+          actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" "--raw" ];
 
         # OCR Screenshot - select area and extract text to clipboard
         "Mod+O".action = actions.spawn [ "/etc/nixos/scripts/ocr-screenshot" ];
 
         # Temp Terminal
-        "Mod+T".action = actions.spawn [
-          "kitten"
-          "quick-access-terminal"
-        ];
+        "Mod+T".action = actions.spawn [ "kitten" "quick-access-terminal" ];
 
         # LLM
         "Mod+L".action = actions.spawn [
@@ -166,9 +151,7 @@ in
   programs = {
     fuzzel = {
       enable = true;
-      settings = {
-        main.icons-enabled = false;
-      };
+      settings = { main.icons-enabled = false; };
     };
 
     tofi = {

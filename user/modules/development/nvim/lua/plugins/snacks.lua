@@ -10,32 +10,23 @@ return {
 					border = "rounded",
 					box = "vertical",
 
-                    -- size: use absolute integer dimensions to avoid any
-                    -- fractional height/width calculations that Neovim rejects.
-                    -- These are reasonable defaults you can tune to taste.
-                    width = 80,
-                    min_width = 60,
-                    height = 30,
-                    min_height = 10,
-
-					-- center it
-					--row = 0.2,
-					--col = 0.2,
+					width = 80,
+					min_width = 60,
+					height = 30,
+					min_height = 10,
 
 					title = "{title} {live} {flags}",
 					title_pos = "center",
 
-                    { win = "input", height = 1, border = "bottom" },
-                    { win = "list", border = "none" },
-                    { win = "preview", title = "{preview}", height = 15, min_height = 8, border = "top" },
+					{ win = "input", height = 1, border = "bottom" },
+					{ win = "list", border = "none" },
+					{ win = "preview", title = "{preview}", height = 15, min_height = 8, border = "top" },
 				},
 			},
 
 			sources = {
 				explorer = {
-					jump = {
-						close = true, -- close explorer after opening a file
-					},
+					jump = { close = true },
 				},
 			},
 		},
@@ -44,6 +35,7 @@ return {
 			replace_netrw = true,
 		},
 	},
+
 	keys = {
 		{
 			"<C-Space>",
@@ -65,6 +57,26 @@ return {
 				Snacks.picker.lsp_references()
 			end,
 			desc = "LSP References",
+		},
+		{
+			"<leader>j",
+			function()
+				require("pickers.just").pick()
+			end,
+			desc = "Just: pick recipe",
+		},
+		{
+			"<leader>df",
+			function()
+				require("dap").run({
+					type = "python",
+					request = "attach",
+					name = "Attach: FreeCAD (debugpy :5678)",
+					connect = { host = "127.0.0.1", port = 5678 },
+					justMyCode = false,
+				})
+			end,
+			desc = "DAP: attach FreeCAD",
 		},
 	},
 }
