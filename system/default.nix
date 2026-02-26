@@ -22,20 +22,12 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # Media libraries for MiniDLNA
     ffmpeg
     pulseaudio
     pavucontrol
-    # Home Manager CLI tool
     home-manager
-    # Modern CLI tools for zsh configuration
-    ripgrep
-    fd
-    neovim
     git
   ];
-
-  # Note: gnome-keyring, libsecret, and nixfmt-rfc-style moved to user packages (mattm/packages.nix)
 
   nix = {
     settings = {
@@ -46,9 +38,7 @@
       download-buffer-size = 52428800;
       auto-optimise-store = true;
     };
-    # NIX_PATH for better nixd flake support
     nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
-    # Automatic garbage collection
     gc = {
       automatic = true;
       dates = "weekly";
@@ -58,11 +48,8 @@
 
   programs.nix-ld.enable = true;
 
-  # Limit number of generations to keep
   boot.loader.systemd-boot.configurationLimit = 10;
 
-  # Time & locale
-  # time.timeZone = "America/New_York";
   services.automatic-timezoned.enable = true;
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
@@ -77,15 +64,9 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-  # Unfree packages allowed
-  nixpkgs.config.allowUnfree = true;
-
-  # Fonts for proper icon display in terminal
   fonts.packages = with pkgs; [
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
     nerd-fonts.hack
   ];
-
-  system.stateVersion = "25.05";
 }

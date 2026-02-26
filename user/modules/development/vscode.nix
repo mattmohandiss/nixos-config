@@ -6,9 +6,6 @@
     package = pkgs.vscodium;
 
     profiles.default = {
-
-      #userSettings = /etc/nixos/user/modules/development/vscode.json;
-
       extensions =
         with pkgs.vscode-extensions;
         [

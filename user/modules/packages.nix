@@ -17,8 +17,8 @@
     curl
     jq
     imagemagick
-    aria2 # Multi-protocol download utility with torrent support
-    mpv # Media player
+    aria2
+    mpv
     kdePackages.filelight
     nautilus
     gimp
@@ -26,43 +26,26 @@
     love
     zoom-us
     discord
-
-    # Bun development tools
-    bun # Fast JavaScript runtime and package manager
+    bun
     nodejs
-
     zip
     unzip
-
-    # GPG for Git commit signing
     gnupg
     pinentry-gtk2
-
     fwupd
-
     godot
     blender
-
     bat
     btop
     eza
-
     grim
     slurp
-    tesseract # OCR engine for text extraction
-
-    # Directory environment management
+    tesseract
     direnv
-
-    # On Screen Keyboard
     wvkbd
-
-    # Rotation
     wlr-randr
-
     zathura
     lazygit
-
-		just
+    just
   ];
 }

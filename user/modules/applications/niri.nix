@@ -2,44 +2,35 @@
 
 let inherit (config.lib.niri) actions;
 in {
-  # Niri window manager configuration
   programs.niri = {
     settings = {
       prefer-no-csd = true;
 
-      # Disable hotkey overlay on startup
       hotkey-overlay.skip-at-startup = true;
 
       input = { power-key-handling.enable = false; };
 
-      # Environment variables for Wayland compatibility
       environment = {
         "NIXOS_OZONE_WL" = "1";
         "XDG_CURRENT_DESKTOP" = "GNOME";
         "XDG_SESSION_TYPE" = "wayland";
         "GIO_USE_VFS" = "local";
         "DISPLAY" = ":0";
-        # Askpass configuration for fuzzel
         "SUDO_ASKPASS" = "/etc/nixos/scripts/fuzzel-askpass";
         "SSH_ASKPASS_REQUIRE" = "force";
         "TERMINAL" = "kitty";
       };
 
-      # Auto-start xwayland-satellite for X11 application support
       spawn-at-startup = [
         { command = [ "xwayland-satellite" ]; }
-        { command = [ "/etc/nixos/pawbar/result/bin/pawbar" ]; }
       ];
 
       animations.enable = false;
 
-      # Window layout configuration
       layout = {
         empty-workspace-above-first = true;
 
         gaps = 0;
-        # center-focused-column = "never";
-        # always-center-single-column = false;
 
         border = {
           enable = true;
@@ -66,32 +57,27 @@ in {
         {
           matches = [{ app-id = "love"; }];
 
-          # ensure it goes into floating layout
           tiled-state = false;
 
           default-floating-position = {
             relative-to = "top-right";
-            x = 50; # 50px from right edge
-            y = 50; # 50px from top edge
+            x = 50;
+            y = 50;
           };
         }
       ];
 
-      # Keybindings
       binds = {
-        # Application launcher and window management
         "Mod+d".action = actions.spawn [ "tofi-drun" "--drun-launch=true" ];
         "Mod+Space".action = actions.spawn "fuzzel";
         "Mod+Escape".action = actions.close-window;
 
-        # Focus navigation
         "Mod+Tab".action = actions.toggle-overview;
         "Mod+Left".action = actions.focus-column-left;
         "Mod+Right".action = actions.focus-column-right;
         "Mod+Up".action = actions.focus-workspace-up;
         "Mod+Down".action = actions.focus-workspace-down;
 
-        # Window movement
         "Mod+Shift+Left".action = actions.swap-window-left;
         "Mod+Shift+Right".action = actions.swap-window-right;
         "Mod+Shift+Up".action = actions.move-window-to-workspace-up;
@@ -99,20 +85,17 @@ in {
 
         "Mod+Ctrl+Tab".action = actions.switch-preset-column-width;
 
-        # Window resizing
         "Mod+Ctrl+Left".action = actions.set-column-width "-1%";
         "Mod+Ctrl+Right".action = actions.set-column-width "+1%";
         "Mod+Ctrl+Up".action = actions.set-window-height "-1%";
         "Mod+Ctrl+Down".action = actions.set-window-height "+1%";
         "Mod+F".action = actions.maximize-column;
 
-        # Hardware controls - brightness
         "Mod+XF86AudioRaiseVolume".action =
           actions.spawn [ "brightnessctl" "set" "+5%" ];
         "Mod+XF86AudioLowerVolume".action =
           actions.spawn [ "brightnessctl" "set" "5%-" ];
 
-        # Hardware controls - audio
         "XF86AudioRaiseVolume".action =
           actions.spawn [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "1%+" ];
         "XF86AudioLowerVolume".action =
@@ -120,20 +103,15 @@ in {
         "XF86AudioMute".action =
           actions.spawn [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
 
-        # Screenshot
         "Mod+S".action =
           actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" ];
-        # Screenshot (raw PNG)
         "Mod+Shift+S".action =
           actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" "--raw" ];
 
-        # OCR Screenshot - select area and extract text to clipboard
         "Mod+O".action = actions.spawn [ "/etc/nixos/scripts/ocr-screenshot" ];
 
-        # Temp Terminal
         "Mod+T".action = actions.spawn [ "kitten" "quick-access-terminal" ];
 
-        # LLM
         "Mod+L".action = actions.spawn [
           "kitten"
           "quick-access-terminal"
@@ -147,7 +125,6 @@ in {
     };
   };
 
-  # Application launcher configuration
   programs = {
     fuzzel = {
       enable = true;
@@ -165,7 +142,6 @@ in {
         outline-width = 1;
         boarder-width = 0;
         corner-radius = 25;
-        #			font-size=21;
         num-results = 0;
         result-spacing = 4;
       };

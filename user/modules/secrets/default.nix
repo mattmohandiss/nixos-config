@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  imports = [
-    ./gpg.nix
-  ];
+  programs.gpg = {
+    enable = true;
+  };
 }

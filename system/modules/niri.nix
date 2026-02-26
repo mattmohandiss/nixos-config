@@ -12,7 +12,6 @@
     package = pkgs.niri-unstable;
   };
 
-  # Login manager
   services.greetd = {
     enable = true;
     settings = {
@@ -23,21 +22,16 @@
     };
   };
 
-  # Environment for Wayland
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     WLR_NO_HARDWARE_CURSORS = "1";
-    # Note: XDG_CURRENT_DESKTOP is set in mattm/desktop/niri.nix
   };
 
-  # Wayland portals
   xdg.portal.enable = true;
-  xdg.portal.config.common.default = "*"; # Fix portal warning
+  xdg.portal.config.common.default = "*";
 
-  # XWayland support for X11 applications like Steam
   environment.systemPackages = with pkgs; [ xwayland-satellite ];
 
-  # Keyboard layout
   services.xserver.xkb = {
     layout = "dk";
     variant = "";
