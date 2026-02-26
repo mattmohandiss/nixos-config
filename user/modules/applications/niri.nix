@@ -23,6 +23,8 @@ in {
 
       spawn-at-startup = [
         { command = [ "xwayland-satellite" ]; }
+        # start pawbar (now provided via flake input) at session startup
+        { command = [ "pawbar" ]; }
       ];
 
       animations.enable = false;
