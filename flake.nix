@@ -28,11 +28,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # enable git submodules for flakes located in git repositories
+    self = {
+      submodules = true;
+    };
+
     pawbar = {
-      url = "github:nekorg/pawbar";
+      url = "git+https://github.com/nekorg/pawbar.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
+
 
   outputs = { self, nixpkgs, ... }@inputs:
     let

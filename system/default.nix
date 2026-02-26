@@ -28,7 +28,25 @@
     home-manager
     git
     # pawbar provided via flake input
-    (inputs.pawbar.packages.${system}.default)
+    # Use a local override that fetches pawbar with submodules so vaxis is present
+    (let
+      pawSrc = pkgs.fetchgit {
+        url = "https://github.com/nekorg/pawbar.git";
+        rev = "8a4359c04599da753cc311c2d97e89e0677a4111";
+        fetchSubmodules = true;
+        # pinned sha256 computed from a previous fetch
+        sha256 = "sha256-7a9Ry2bWeERjOVSgYXFmrHRc+PpvMJ3ED1SWNpifI9Y=";
+      };
+    in pkgs.buildGoModule {
+      pname = "pawbar-local";
+      version = "0-unstable-2025-08-31";
+      src = pawSrc;
+      # repo layout exposes the CLI under `cmd/`, not `cmd/pawbar`
+      subPackages = [ "cmd" ];
+      vendorHash = "sha256-DUjfFrmpjSUWDicncTXvL1mnnPqEEKGyz6PTLEnGD7E=";
+      buildInputs = with pkgs; [ udev librsvg cairo ];
+      nativeBuildInputs = with pkgs; [ pkg-config ];
+    })
   ];
 
   nix = {

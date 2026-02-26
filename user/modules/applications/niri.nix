@@ -149,4 +149,28 @@ in {
       };
     };
   };
+
+  # Run pawbar as a systemd user service so it is started at session login
+  # and benefits from automatic restart and logging. Use the Home Manager
+  # systemd user service schema (Unit/Service/Install) to match other
+  # user services in this configuration (see wallpaper.nix).
+  systemd.user.services.pawbar = {
+    Unit = {
+      Description = "Pawbar panel";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      # Use the current store path for now so the service can start.
+      # This is updated automatically on future rebuilds if pawbar is
+      # included in `environment.systemPackages` (then /run/current-system/sw/bin/pawbar
+      # will exist and the unit can be changed back to that path).
+      ExecStart = "/nix/store/xqsrk1xic2xxak7aaxbsdyxrjv4n66is-pawbar-0-unstable-2025-08-31/bin/pawbar";
+      Restart = "on-failure";
+      RestartSec = 5;
+      KillMode = "process";
+      TimeoutStopSec = 10;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 }
