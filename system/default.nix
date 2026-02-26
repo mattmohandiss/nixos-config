@@ -27,6 +27,8 @@
     pavucontrol
     home-manager
     git
+    # pawbar provided via flake input
+    (inputs.pawbar.packages.${system}.default)
   ];
 
   nix = {

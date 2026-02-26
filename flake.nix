@@ -27,6 +27,11 @@
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    pawbar = {
+      url = "github:nekorg/pawbar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, ... }@inputs:
@@ -49,4 +54,3 @@
       };
     };
 }
-
