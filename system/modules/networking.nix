@@ -58,5 +58,5 @@
 
   # Place eduroam CA cert into /etc/ssl/certs so NetworkManager can use it
   # Source path is the file in the repo root
-  environment.etc."ssl/certs/eduroam.pem".source = /etc/nixos/eduroam.pem;
+  environment.etc."ssl/certs/eduroam.pem".source = ../../eduroam.pem;
 }
