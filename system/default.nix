@@ -28,6 +28,7 @@
     pavucontrol
     home-manager
     git
+		nil
   ];
 
   nix = {

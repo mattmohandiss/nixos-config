@@ -45,9 +45,9 @@
         inherit system;
 
         modules = [
+          inputs.stylix.nixosModules.stylix
           ./system
           ./user
-          inputs.stylix.nixosModules.stylix
         ];
 
         specialArgs = { inherit inputs; };
