@@ -4,17 +4,18 @@
 , ...
 }: {
   imports = [
-    ./modules/audio.nix
     ./modules/boot.nix
     ./modules/gaming.nix
     ./modules/hardware-configuration.nix
+    ./modules/hardware.nix
     ./modules/networking.nix
     ./modules/niri.nix
-    ./modules/power.nix
     ./modules/security.nix
     ./modules/services.nix
     ./modules/users.nix
   ];
+
+  system.stateVersion = "25.05";
 
   hardware.bluetooth = {
     enable = true;
@@ -27,26 +28,6 @@
     pavucontrol
     home-manager
     git
-    # pawbar provided via flake input
-    # Use a local override that fetches pawbar with submodules so vaxis is present
-    (let
-      pawSrc = pkgs.fetchgit {
-        url = "https://github.com/nekorg/pawbar.git";
-        rev = "8a4359c04599da753cc311c2d97e89e0677a4111";
-        fetchSubmodules = true;
-        # pinned sha256 computed from a previous fetch
-        sha256 = "sha256-7a9Ry2bWeERjOVSgYXFmrHRc+PpvMJ3ED1SWNpifI9Y=";
-      };
-    in pkgs.buildGoModule {
-      pname = "pawbar-local";
-      version = "0-unstable-2025-08-31";
-      src = pawSrc;
-      # repo layout exposes the CLI under `cmd/`, not `cmd/pawbar`
-      subPackages = [ "cmd" ];
-      vendorHash = "sha256-DUjfFrmpjSUWDicncTXvL1mnnPqEEKGyz6PTLEnGD7E=";
-      buildInputs = with pkgs; [ udev librsvg cairo ];
-      nativeBuildInputs = with pkgs; [ pkg-config ];
-    })
   ];
 
   nix = {
@@ -55,8 +36,6 @@
         "nix-command"
         "flakes"
       ];
-      download-buffer-size = 52428800;
-      auto-optimise-store = true;
     };
     nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
     gc = {
@@ -83,10 +62,4 @@
     LC_TELEPHONE = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
-
-  fonts.packages = with pkgs; [
-    nerd-fonts.fira-code
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.hack
-  ];
 }

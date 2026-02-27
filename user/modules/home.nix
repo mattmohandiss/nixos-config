@@ -6,6 +6,8 @@
 }:
 
 {
+  programs.gpg.enable = true;
+
   # Home Manager core configuration
   home = {
     username = "mattm";

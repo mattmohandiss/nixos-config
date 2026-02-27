@@ -3,6 +3,9 @@ return {
 	priority = 1000,
 	lazy = false,
 	opts = {
+		scroll = {
+		},
+
 		picker = {
 			layout = {
 				layout = {
@@ -27,12 +30,14 @@ return {
 			sources = {
 				explorer = {
 					jump = { close = true },
+					hidden = true,
 				},
 			},
 		},
 
 		explorer = {
 			replace_netrw = true,
+			trash = true,
 		},
 	},
 

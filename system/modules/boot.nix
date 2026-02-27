@@ -41,13 +41,12 @@
       "surface_hid"
       "surface_kbd"
     ];
-    crashDump.enable = false;
+    crashDump.enable = true;
     kernelParams = [
       "mem_sleep_default=deep"
       "crashkernel=128M"
       "panic=10"
       "panic_on_warn=0"
-      "nmi_watchdog=panic"
       "printk.devkmsg=on"
       "log_buf_len=1M"
       "loglevel=4"

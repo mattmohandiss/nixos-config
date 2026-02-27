@@ -64,47 +64,42 @@ end, { silent = true })
 vim.o.updatetime = 250
 
 vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    local bufnr = args.buf
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if not client then return end
+	callback = function(args)
+		local bufnr = args.buf
+		local client = vim.lsp.get_client_by_id(args.data.client_id)
+		if not client then
+			return
+		end
 
-    vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { buffer = bufnr, desc = "Format" })
+		vim.keymap.set("n", "<leader>f", vim.lsp.buf.format, { buffer = bufnr, desc = "Format" })
 
-    if client.server_capabilities.documentHighlightProvider then
-      local group = vim.api.nvim_create_augroup("LspDocumentHighlight", { clear = false })
+		if client.server_capabilities.documentHighlightProvider then
+			local group = vim.api.nvim_create_augroup("LspDocumentHighlight", { clear = false })
 
-      vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-        group = group,
-        buffer = bufnr,
-        callback = vim.lsp.buf.document_highlight,
-      })
+			vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+				group = group,
+				buffer = bufnr,
+				callback = vim.lsp.buf.document_highlight,
+			})
 
-      vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-        group = group,
-        buffer = bufnr,
-        callback = vim.lsp.buf.clear_references,
-      })
-    end
-end,
+			vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+				group = group,
+				buffer = bufnr,
+				callback = vim.lsp.buf.clear_references,
+			})
+		end
+	end,
 })
-
--- Remove conflicting <C-F> mapping inside Mason UI buffers
--- (Optional) If you still want to block <C-F> inside mason, uncomment below.
--- vim.api.nvim_create_autocmd("FileType", {
---   pattern = "mason",
---   callback = function()
---     pcall(vim.keymap.del, 'n', '<C-F>', { buffer = true })
---     pcall(vim.keymap.del, 'i', '<C-F>', { buffer = true })
---   end,
--- })
 
 require("lazy").setup({
 	spec = {
 		{ import = "plugins" },
 	},
 
-	checker = { enabled = true },
+	checker = {
+		enabled = true,
+		notify = false,
+	},
 
 	ui = {
 		border = "rounded",

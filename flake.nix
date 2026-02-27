@@ -28,19 +28,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # enable git submodules for flakes located in git repositories
-    self = {
-      submodules = true;
-    };
-
     pawbar = {
       url = "git+https://github.com/nekorg/pawbar.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-
-  outputs = { self, nixpkgs, ... }@inputs:
+  outputs =
+    { self, nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
       inherit (nixpkgs) lib;
@@ -49,12 +44,11 @@
       nixosConfigurations.nixos = lib.nixosSystem {
         inherit system;
 
-        modules =
-          [
-            ./system
-            ./user
-            inputs.stylix.nixosModules.stylix
-          ];
+        modules = [
+          ./system
+          ./user
+          inputs.stylix.nixosModules.stylix
+        ];
 
         specialArgs = { inherit inputs; };
       };

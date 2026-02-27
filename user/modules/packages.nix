@@ -10,8 +10,6 @@
     gnome-keyring
     libsecret
     gcr
-    nerd-fonts.fira-code
-    mako
     libnotify
     swww
     curl
@@ -35,13 +33,10 @@
     fwupd
     godot
     blender
-    bat
     btop
-    eza
     grim
     slurp
     tesseract
-    direnv
     wvkbd
     wlr-randr
     zathura
