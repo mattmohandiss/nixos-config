@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, username, ... }:
 
 {
   stylix = {
@@ -27,7 +27,6 @@
         friendly_name = "Matt's Laptop";
         media_dir = [ "V,/srv/media" ];
         port = 8200;
-        presentation_url = "http://192.168.68.0:8200/";
         inotify = "yes";
         enable_tivo = "no";
         strict_dlna = "no";
@@ -76,7 +75,7 @@
   ];
 
   systemd.tmpfiles.rules = [
-    "d /srv/media 0775 mattm users -"
+    "d /srv/media 0775 ${username} users -"
     "d /var/crash-reports 0755 root root -"
     "d /var/log/crash-analysis 0755 root root -"
   ];

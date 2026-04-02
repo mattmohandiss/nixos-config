@@ -1,4 +1,8 @@
-{ config, pkgs, ... }:
+{ inputs, pkgs, ... }:
+
+let
+  askpass = "${inputs.self}/scripts/zenity-askpass";
+in
 
 {
   stylix.targets.neovim.enable = false;
@@ -27,7 +31,7 @@
         core = {
           editor = "nvim";
           autocrlf = "input";
-          askpass = "/etc/nixos/scripts/zenity-askpass";
+          askpass = askpass;
         };
         credential.helper = "libsecret";
         commit.gpgsign = true;
@@ -66,15 +70,19 @@
             ms-python.vscode-pylance
             mkhl.direnv
           ]
-          ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [];
+          ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [ ];
       };
     };
   };
 
   home.file.".config/nvim" = {
     target = ".config/nvim";
-    source = config.lib.file.mkOutOfStoreSymlink
-      "/etc/nixos/user/modules/development/nvim";
+    source = "${inputs.self}/user/modules/development/nvim";
+  };
+
+  xdg.configFile."opencode" = {
+    recursive = true;
+    source = "${inputs.self}/user/modules/development/opencode";
   };
 
   xdg.configFile."VSCodium/argv.json".text = builtins.toJSON {

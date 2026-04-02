@@ -1,9 +1,13 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 
+let
+  firefoxExtensionsDir = "share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
+  ublockOrigin = pkgs.nur.repos.rycee.firefox-addons.ublock-origin;
+  bitwarden = pkgs.nur.repos.rycee.firefox-addons.bitwarden;
+in
 {
   programs.zen-browser = {
     enable = true;
-    suppressXdgMigrationWarning = true;
 
     policies = {
       DisableAppUpdate = true;
@@ -24,11 +28,11 @@
 
       ExtensionSettings = {
         "uBlock0@raymondhill.net" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+          install_url = "file://${ublockOrigin}/${firefoxExtensionsDir}/uBlock0@raymondhill.net.xpi";
           installation_mode = "force_installed";
         };
         "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi";
+          install_url = "file://${bitwarden}/${firefoxExtensionsDir}/{446900e4-71c2-419f-a6a7-df9c091e268b}.xpi";
           installation_mode = "force_installed";
         };
       };

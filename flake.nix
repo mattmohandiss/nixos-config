@@ -15,7 +15,6 @@
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs."nixpkgs-stable".follows = "nixpkgs";
     };
 
     zen-browser = {
@@ -28,6 +27,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    cascadefox = {
+      url = "github:cascadefox/cascade";
+      flake = false;
+    };
+
     pawbar = {
       url = "git+https://github.com/nekorg/pawbar.git";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -38,6 +42,9 @@
     { self, nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
+      username = "mattm";
+      fullName = "Matt Mohandiss";
+      homeDirectory = "/home/${username}";
       inherit (nixpkgs) lib;
     in
     {
@@ -50,7 +57,9 @@
           ./user
         ];
 
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inherit inputs username fullName homeDirectory;
+        };
       };
     };
 }

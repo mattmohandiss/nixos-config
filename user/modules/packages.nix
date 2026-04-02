@@ -11,7 +11,7 @@
     libsecret
     gcr
     libnotify
-    swww
+    awww
     curl
     jq
     imagemagick
@@ -36,6 +36,7 @@
     btop
     grim
     slurp
+    poppler-utils
     tesseract
     wvkbd
     wlr-randr

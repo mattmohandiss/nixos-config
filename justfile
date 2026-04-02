@@ -10,6 +10,7 @@ switch:
 build:
   sudo nixos-rebuild build --flake .
 
+alias upgrade := update
 update:
   nix flake update
 

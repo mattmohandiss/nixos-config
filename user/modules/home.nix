@@ -2,31 +2,37 @@
 , config
 , pkgs
 , inputs
+, username
+, homeDirectory
 , ...
 }:
 
+let
+  homeScripts = "${inputs.self}/scripts";
+in
 {
   programs.gpg.enable = true;
 
+  gtk.gtk4.theme = config.gtk.theme;
+
   # Home Manager core configuration
   home = {
-    username = "mattm";
-    homeDirectory = "/home/mattm";
+    inherit username homeDirectory;
     stateVersion = "25.05";
     sessionPath = [
-      "/etc/nixos/scripts"
+      homeScripts
       "$HOME/.bun/bin"
     ];
     file = {
       ".gnupg/gpg-agent.conf" = {
         text = ''
-          pinentry-program /etc/nixos/scripts/zenity-pinentry
+          pinentry-program ${homeScripts}/zenity-pinentry
         '';
       };
       ".config/environment.d/askpass.conf" = {
         text = ''
-          GIT_ASKPASS=/etc/nixos/scripts/zenity-askpass
-          SSH_ASKPASS=/etc/nixos/scripts/zenity-askpass
+          GIT_ASKPASS=${homeScripts}/zenity-askpass
+          SSH_ASKPASS=${homeScripts}/zenity-askpass
           export GIT_ASKPASS SSH_ASKPASS
         '';
       };

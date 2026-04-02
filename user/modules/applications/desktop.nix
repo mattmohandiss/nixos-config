@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
+
+let
+  wallpaperScript = "${inputs.self}/scripts/wallpaper";
+in
 
 {
   services.mako = {
@@ -13,15 +17,15 @@
     };
   };
 
-  systemd.user.services.swww = {
+  systemd.user.services.awww = {
     Unit = {
-      Description = "Swww wallpaper daemon";
+      Description = "Awww wallpaper daemon";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${pkgs.swww}/bin/swww-daemon";
-      ExecStartPost = "${pkgs.bash}/bin/bash -c '/etc/nixos/scripts/wallpaper load'";
+      ExecStart = "${pkgs.awww}/bin/awww-daemon";
+      ExecStartPost = "${wallpaperScript} load";
       Restart = "on-failure";
       RestartSec = 1;
       TimeoutStopSec = 10;

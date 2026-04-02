@@ -1,15 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
-let
-  cascadeFox = pkgs.fetchFromGitHub {
-    owner = "cascadefox";
-    repo = "cascade";
-    rev = "main";
-    sha256 = "sha256-adhwQpPb69wT5SZTmu7VxBbFpM4NNAuz4258k46T4K0=";
-  };
-in
 {
-  home.file.".mozilla/firefox/default/chrome".source = "${cascadeFox}/chrome";
+  home.file.".mozilla/firefox/default/chrome".source = "${inputs.cascadefox}/chrome";
 
   programs.firefox = {
     enable = true;

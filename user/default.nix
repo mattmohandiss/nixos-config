@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, username, fullName, homeDirectory, ... }:
 
 {
   imports = [ inputs.home-manager.nixosModules.home-manager ];
@@ -11,9 +11,11 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = {
+      inherit inputs username fullName homeDirectory;
+    };
     backupFileExtension = ".bak";
-    users.mattm = {
+    users.${username} = {
       imports = [
         inputs.zen-browser.homeModules.twilight
         ./modules/home.nix

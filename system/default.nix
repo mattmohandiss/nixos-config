@@ -28,11 +28,12 @@
     pavucontrol
     home-manager
     git
-		nil
+    nil
   ];
 
   nix = {
     settings = {
+      auto-optimise-store = true;
       experimental-features = [
         "nix-command"
         "flakes"
@@ -44,6 +45,13 @@
       dates = "weekly";
       options = "--delete-older-than 30d";
     };
+  };
+
+  system.autoUpgrade = {
+    enable = true;
+    dates = "weekly";
+    randomizedDelaySec = "45min";
+    flake = "/etc/nixos#nixos";
   };
 
   programs.nix-ld.enable = true;

@@ -1,10 +1,10 @@
-{ config, pkgs, ... }:
+{ pkgs, username, fullName, homeDirectory, ... }:
 
 {
   # User accounts
-  users.users.mattm = {
+  users.users.${username} = {
     isNormalUser = true;
-    description = "Matt Mohandiss";
+    description = fullName;
     extraGroups = [
       "networkmanager"
       "wheel"
@@ -27,5 +27,5 @@
   users.users.minidlna.extraGroups = [ "users" ];
 
   # Set proper permissions for home directory
-  systemd.tmpfiles.rules = [ "d /home/mattm 0750 mattm users - -" ];
+  systemd.tmpfiles.rules = [ "d ${homeDirectory} 0750 ${username} users - -" ];
 }

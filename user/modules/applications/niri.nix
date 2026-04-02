@@ -1,7 +1,23 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
-let inherit (config.lib.niri) actions;
-in {
+let
+  inherit (config.lib.niri) actions;
+  selfScripts = "${inputs.self}/scripts";
+  pawbarPkg = pkgs.buildGoModule {
+    pname = "pawbar";
+    version = "0-unstable";
+    src = inputs.pawbar.outPath;
+    subPackages = [ "." ];
+    vendorHash = "sha256-DUjfFrmpjSUWDicncTXvL1mnnPqEEKGyz6PTLEnGD7E=";
+    buildInputs = with pkgs; [
+      udev
+      librsvg
+      cairo
+    ];
+    nativeBuildInputs = with pkgs; [ pkg-config ];
+  };
+in
+{
   programs.niri = {
     settings = {
       prefer-no-csd = true;
@@ -16,18 +32,16 @@ in {
         "XDG_SESSION_TYPE" = "wayland";
         "GIO_USE_VFS" = "local";
         "DISPLAY" = ":0";
-        "SUDO_ASKPASS" = "/etc/nixos/scripts/fuzzel-askpass";
+        "SUDO_ASKPASS" = "${selfScripts}/fuzzel-askpass";
         "SSH_ASKPASS_REQUIRE" = "force";
         "TERMINAL" = "kitty";
       };
 
       spawn-at-startup = [
         { command = [ "xwayland-satellite" ]; }
-        # start pawbar (now provided via flake input) at session startup
-        { command = [ "pawbar" ]; }
       ];
 
-      animations.enable = false;
+      animations.slowdown = 0.25;
 
       layout = {
         empty-workspace-above-first = true;
@@ -106,11 +120,11 @@ in {
           actions.spawn [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
 
         "Mod+S".action =
-          actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" ];
+          actions.spawn [ "${selfScripts}/screenshot-interactive" ];
         "Mod+Shift+S".action =
-          actions.spawn [ "/etc/nixos/scripts/screenshot-interactive" "--raw" ];
+          actions.spawn [ "${selfScripts}/screenshot-interactive" "--raw" ];
 
-        "Mod+O".action = actions.spawn [ "/etc/nixos/scripts/ocr-screenshot" ];
+        "Mod+O".action = actions.spawn [ "${selfScripts}/ocr-screenshot" ];
 
         "Mod+T".action = actions.spawn [ "kitten" "quick-access-terminal" ];
 
@@ -142,7 +156,7 @@ in {
         width = "60%";
         height = "60%";
         outline-width = 1;
-        boarder-width = 0;
+        border-width = 0;
         corner-radius = 25;
         num-results = 0;
         result-spacing = 4;
@@ -150,10 +164,6 @@ in {
     };
   };
 
-  # Run pawbar as a systemd user service so it is started at session login
-  # and benefits from automatic restart and logging. Use the Home Manager
-  # systemd user service schema (Unit/Service/Install) to match other
-  # user services in this configuration (see wallpaper.nix).
   systemd.user.services.pawbar = {
     Unit = {
       Description = "Pawbar panel";
@@ -161,11 +171,7 @@ in {
       After = [ "graphical-session.target" ];
     };
     Service = {
-      # Use the current store path for now so the service can start.
-      # This is updated automatically on future rebuilds if pawbar is
-      # included in `environment.systemPackages` (then /run/current-system/sw/bin/pawbar
-      # will exist and the unit can be changed back to that path).
-      ExecStart = "/nix/store/xqsrk1xic2xxak7aaxbsdyxrjv4n66is-pawbar-0-unstable-2025-08-31/bin/pawbar";
+      ExecStart = "${pawbarPkg}/bin/pawbar";
       Restart = "on-failure";
       RestartSec = 5;
       KillMode = "process";
