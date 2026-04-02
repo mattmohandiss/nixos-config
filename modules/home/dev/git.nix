@@ -1,0 +1,37 @@
+{ inputs, ... }:
+
+let
+  askpass = "${inputs.self}/scripts/zenity-askpass";
+in
+{
+  programs.git = {
+    enable = true;
+    settings = {
+      user = {
+        name = "Matt Mohandiss";
+        email = "mattmohandiss@gmail.com";
+      };
+      alias = {
+        st = "status";
+        co = "checkout";
+        br = "branch";
+        ci = "commit";
+        unstage = "reset HEAD --";
+        last = "log -1 HEAD";
+        visual = "!gitk";
+      };
+      init.defaultBranch = "main";
+      pull.rebase = true;
+      push.default = "simple";
+      branch.autosetupmerge = "always";
+      core = {
+        editor = "nvim";
+        autocrlf = "input";
+        inherit askpass;
+      };
+      credential.helper = "libsecret";
+      commit.gpgsign = true;
+      user.signingkey = "381948BAC468E711";
+    };
+  };
+}

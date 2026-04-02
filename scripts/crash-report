@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -u
+
 # This script must be run with sudo
 if [ "$EUID" -ne 0 ]; then
     echo "Please run this script with sudo."
@@ -61,6 +63,20 @@ run_cmd() {
     echo ""
 }
 
+run_cmd_if_available() {
+    local bin="$1"
+    local cmd="$2"
+    local description="$3"
+
+    if command -v "$bin" >/dev/null 2>&1; then
+        run_cmd "$cmd" "$description"
+    else
+        echo "--- $description ---"
+        echo "Skipped: '$bin' is not installed."
+        echo ""
+    fi
+}
+
 # --- Report Generation ---
 
 echo "NixOS Crash Analysis Report"
@@ -80,7 +96,7 @@ add_section "APPLICATION CRASH ANALYSIS"
 run_cmd "coredumpctl list -1 --no-pager" "Application coredumps from previous boot"
 
 add_section "HARDWARE HEALTH ANALYSIS"
-run_cmd "ras-mc-ctl --summary" "RAS daemon summary (CPU/Memory Errors)"
+run_cmd_if_available "ras-mc-ctl" "ras-mc-ctl --summary" "RAS daemon summary (CPU/Memory Errors)"
 run_cmd "sensors" "All temperature readings"
 run_cmd "smartctl -a /dev/nvme0n1" "NVMe drive health"
 run_cmd "cat /proc/loadavg" "System load averages"

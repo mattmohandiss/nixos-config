@@ -5,10 +5,10 @@ format:
   nixpkgs-fmt .
 
 switch:
-  sudo nixos-rebuild switch
+  sudo nixos-rebuild switch --flake 'path:/etc/nixos#surface'
 
 build:
-  sudo nixos-rebuild build --flake .
+  sudo nixos-rebuild build --flake 'path:/etc/nixos#surface'
 
 alias upgrade := update
 update:

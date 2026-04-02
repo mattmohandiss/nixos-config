@@ -2,5 +2,5 @@
 .direnv
 wallpapers
 result
-home/modules/mcp/**/node_modules/
+modules/home/dev/opencode/node_modules/
 pawbar

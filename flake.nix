@@ -42,23 +42,19 @@
     { self, nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
-      username = "mattm";
-      fullName = "Matt Mohandiss";
-      homeDirectory = "/home/${username}";
       inherit (nixpkgs) lib;
     in
     {
-      nixosConfigurations.nixos = lib.nixosSystem {
+      nixosConfigurations.surface = lib.nixosSystem {
         inherit system;
 
         modules = [
           inputs.stylix.nixosModules.stylix
-          ./system
-          ./user
+          ./hosts/surface
         ];
 
         specialArgs = {
-          inherit inputs username fullName homeDirectory;
+          inherit inputs;
         };
       };
     };

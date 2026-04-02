@@ -15,7 +15,11 @@ BING_DIR="${WALLPAPER_DIR}/bing"
 CURRENT_WALLPAPER_SYMLINK="${WALLPAPER_DIR}/current.jpg"
 API_URL="https://bing.biturl.top/?resolution=UHD&format=json&index=0&mkt=en-US"
 MAX_WALLPAPERS_TO_KEEP=10
-FONT_PATH="/nix/store/89q3pi7x44wwzp7jg3s0dsrvyj43giry-nerd-fonts-fira-code-3.4.0+6.2/share/fonts/truetype/NerdFonts/FiraCode/FiraCodeNerdFont-Medium.ttf"
+FONT_NAME="FiraCode Nerd Font"
+
+get_font_path() {
+    fc-match "${FONT_NAME}" -f '%{file}\n' 2>/dev/null | head -n 1
+}
 
 # --- Helper Functions ---
 
@@ -38,12 +42,16 @@ notify_and_get_id() {
     notify-send --print-id "Wallpaper" "$1" 2>/dev/null || echo ""
 }
 
-# Sets the wallpaper using swww.
+# Sets the wallpaper using awww.
 # Usage: set_wallpaper /path/to/image [transition_duration]
 set_wallpaper() {
     local wallpaper_path=$1
     local transition_duration=${2:-1}
-    swww img "${wallpaper_path}" \
+    if ! awww query >/dev/null 2>&1; then
+        echo "awww daemon is not available; skipping wallpaper apply."
+        return 0
+    fi
+    awww img "${wallpaper_path}" \
         --resize crop \
         --filter Lanczos3 \
         --transition-type wipe \
@@ -93,6 +101,8 @@ update_bing_wallpaper() {
     local image_url copyright_text
     image_url=$(echo "${response}" | jq -r '.url')
     copyright_text=$(echo "${response}" | jq -r '.copyright' | sed 's/ (©.*)//')
+    local font_path
+    font_path=$(get_font_path)
 
     if [[ -z "${image_url}" || "${image_url}" == "null" ]]; then
         notify "Could not find image URL in API response." "${id}"
@@ -104,7 +114,7 @@ update_bing_wallpaper() {
     today=$(date '+%Y%m%d')
     local new_wallpaper_file="${BING_DIR}/bing_${today}.jpg"
     local temp_file
-    temp_file=$(mktemp)
+    temp_file=$(mktemp --suffix=.jpg)
 
     if ! curl -s -L "${image_url}" -o "${temp_file}"; then
         notify "Failed to download wallpaper image." "${id}"
@@ -113,16 +123,21 @@ update_bing_wallpaper() {
     fi
 
     # Add the copyright text to the image
-    if ! magick "${temp_file}" \
-        -font "${FONT_PATH}" \
-        -gravity South \
-        -pointsize 36 \
-        -fill white \
-        -undercolor '#00000080' \
-        -annotate +0+5 " ${copyright_text} " \
-        "${new_wallpaper_file}"; then
-        notify "Failed to add copyright text with ImageMagick." "${id}"
-        mv "${temp_file}" "${new_wallpaper_file}" # Move unconverted file as a fallback
+    if [[ -n "${font_path}" ]]; then
+        if ! magick "${temp_file}" \
+            -font "${font_path}" \
+            -gravity South \
+            -pointsize 36 \
+            -fill white \
+            -undercolor '#00000080' \
+            -annotate +0+5 " ${copyright_text} " \
+            "${new_wallpaper_file}"; then
+            notify "Failed to add copyright text with ImageMagick." "${id}"
+            mv "${temp_file}" "${new_wallpaper_file}"
+        fi
+    else
+        notify "Font '${FONT_NAME}' not found; saving wallpaper without caption." "${id}"
+        mv "${temp_file}" "${new_wallpaper_file}"
     fi
     rm -f "${temp_file}"
 
@@ -140,18 +155,18 @@ update_bing_wallpaper() {
     notify "Bing wallpaper has been updated!" "${id}"
 }
 
-# Waits for the swww daemon and display outputs to be ready.
-wait_for_swww() {
+# Waits for the awww daemon and display outputs to be ready.
+wait_for_awww() {
     local attempts=0
     while ((attempts < 20)); do
-        if swww query >/dev/null 2>&1 && [[ $(swww query | wc -l) -gt 0 ]]; then
-            echo "swww daemon is ready."
+        if awww query >/dev/null 2>&1 && [[ $(awww query | wc -l) -gt 0 ]]; then
+            echo "awww daemon is ready."
             return 0
         fi
         sleep 0.5
         ((attempts++))
     done
-    echo "Warning: swww daemon not ready after 10 seconds."
+    echo "Warning: awww daemon not ready after 10 seconds."
     return 1
 }
 
@@ -159,7 +174,10 @@ wait_for_swww() {
 
 case "${1:-}" in
     "load")
-        wait_for_swww
+        if ! wait_for_awww; then
+            echo "Skipping wallpaper load because awww is not ready yet."
+            exit 0
+        fi
         # Load the current wallpaper instantly for a fast startup
         if [[ -e "${CURRENT_WALLPAPER_SYMLINK}" ]]; then
             echo "Loading initial wallpaper: ${CURRENT_WALLPAPER_SYMLINK}"

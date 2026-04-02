@@ -5,8 +5,8 @@
 
 set -euo pipefail
 
-# Generate timestamped filename for temporary image
-temp_file="/tmp/ocr-screenshot-$(date +%F-%T).png"
+# Generate temporary image path
+temp_file=$(mktemp --suffix=.png /tmp/ocr-screenshot-XXXXXX)
 
 # Take screenshot with area selection
 if ! grim -g "$(slurp)" "$temp_file"; then
