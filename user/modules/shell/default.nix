@@ -1,4 +1,7 @@
-{ lib, pkgs, inputs, ... }:
+{ lib
+, pkgs
+, ...
+}:
 
 {
   programs = {
@@ -11,44 +14,57 @@
 
       shellAliases = {
         ls = "eza -a --group-directories-first --icons";
-        ll = "ls -lh";
         cat = "bat";
         ask = "opencode run";
         llm = "opencode";
       };
 
-      initContent = ''
-        setopt AUTO_CD
-        setopt AUTO_PUSHD
-        setopt PUSHD_IGNORE_DUPS
-        setopt GLOB_DOTS
-        setopt NUMERIC_GLOB_SORT
-        setopt NO_BEEP
+      plugins = [
+        {
+          name = "fzf-tab";
+          src = "${pkgs.zsh-fzf-tab}/share/fzf-tab";
+        }
+      ];
 
-        zmodload zsh/complist
-        zstyle ':completion:*' menu select
-        zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-        zstyle ':completion:*' squeeze-slashes true
+      initContent = lib.mkMerge [
+        (lib.mkOrder 450 ''
+          zstyle ':completion:*' menu no
+          zstyle ':completion:*:descriptions' format '[%d]'
+          zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
+          zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+          zstyle ':completion:*' squeeze-slashes true
+        '')
+        (lib.mkOrder 550 ''
+          setopt AUTO_CD
+          setopt AUTO_PUSHD
+          setopt PUSHD_IGNORE_DUPS
+          setopt GLOB_DOTS
+          setopt NUMERIC_GLOB_SORT
+          setopt NO_BEEP
 
-        HISTSIZE=100000
-        SAVEHIST=100000
-        HISTFILE="$HOME/.zsh_history"
+          HISTSIZE=100000
+          SAVEHIST=100000
+          HISTFILE="$HOME/.zsh_history"
 
-        setopt HIST_IGNORE_ALL_DUPS
-        setopt INC_APPEND_HISTORY_TIME
-        setopt SHARE_HISTORY
-        setopt HIST_FCNTL_LOCK
-        setopt EXTENDED_HISTORY
+          setopt HIST_IGNORE_ALL_DUPS
+          setopt INC_APPEND_HISTORY_TIME
+          setopt SHARE_HISTORY
+          setopt HIST_FCNTL_LOCK
+          setopt EXTENDED_HISTORY
 
-        export EDITOR="nvim"
-        export PAGER="less -R"
+          export EDITOR="nvim"
+          export PAGER="less -R"
 
-      '';
+          compdef ls=eza
+
+          zstyle ':fzf-tab:*' switch-group '<' '>'
+        '')
+      ];
     };
 
     fzf = {
       enable = true;
-      enableZshIntegration = true;
+      enableZshIntegration = false;
     };
 
     eza.enable = true;
@@ -60,10 +76,8 @@
       enable = true;
       settings = {
         confirm_os_window_close = 0;
-
         disable_ligatures = "never";
         allow_remote_control = "yes";
-
         font_size = 11.0;
       };
       keybindings = {
