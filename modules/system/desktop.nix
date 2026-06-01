@@ -1,4 +1,9 @@
-{ pkgs, inputs, username, ... }:
+{
+  pkgs,
+  inputs,
+  username,
+  ...
+}:
 
 {
   imports = [ inputs.niri.nixosModules.niri ];
@@ -11,7 +16,7 @@
   services.greetd = {
     enable = true;
     settings.default_session = {
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd niri-session";
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd niri-session --asterisks";
       user = username;
     };
   };
@@ -21,8 +26,11 @@
     WLR_NO_HARDWARE_CURSORS = "1";
   };
 
-  xdg.portal.enable = true;
-  xdg.portal.config.common.default = "*";
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    config.common.default = "gtk";
+  };
 
   services.xserver.xkb = {
     layout = "dk";

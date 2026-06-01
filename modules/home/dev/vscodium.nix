@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  programs.vscode = {
+  programs.vscodium = {
     enable = true;
     package = pkgs.vscodium;
 
@@ -11,7 +11,6 @@
         with pkgs.vscode-extensions;
         [
           christian-kohler.path-intellisense
-          ms-python.python
           ms-python.vscode-pylance
           mkhl.direnv
         ]

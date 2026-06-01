@@ -1,12 +1,8 @@
-{ pkgs, username, ... }:
+{ pkgs, ... }:
 
 {
   environment.systemPackages = with pkgs; [
     ffmpeg
-    pulseaudio
-    pavucontrol
-    home-manager
-    git
     nil
     lm_sensors
     smartmontools
@@ -36,19 +32,18 @@
 
   systemd.coredump = {
     enable = true;
-    extraConfig = ''
-      Storage=external
-      Compress=yes
-      ProcessSizeMax=2G
-      ExternalSizeMax=2G
-      MaxUse=5G
-    '';
+    settings.Coredump = {
+      Storage = "external";
+      Compress = "yes";
+      ProcessSizeMax = "2G";
+      ExternalSizeMax = "2G";
+      MaxUse = "5G";
+    };
   };
 
   systemd.tmpfiles.rules = [
     "d /var/crash-reports 0755 root root -"
     "d /var/log/crash-analysis 0755 root root -"
-    "d /home/${username} 0750 ${username} users - -"
   ];
 
   i18n.defaultLocale = "en_US.UTF-8";

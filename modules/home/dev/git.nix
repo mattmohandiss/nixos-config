@@ -1,7 +1,7 @@
-{ inputs, ... }:
+{ pkgs, ... }:
 
 let
-  askpass = "${inputs.self}/scripts/zenity-askpass";
+  askpass = "${pkgs.wayprompt}/bin/wayprompt-ssh-askpass";
 in
 {
   programs.git = {

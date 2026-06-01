@@ -32,29 +32,31 @@
           zstyle ':completion:*' squeeze-slashes true
         '')
         (lib.mkOrder 550 ''
-          setopt AUTO_CD
-          setopt AUTO_PUSHD
-          setopt PUSHD_IGNORE_DUPS
-          setopt GLOB_DOTS
-          setopt NUMERIC_GLOB_SORT
-          setopt NO_BEEP
+                    setopt AUTO_CD
+                    setopt AUTO_PUSHD
+                    setopt PUSHD_IGNORE_DUPS
+                    setopt GLOB_DOTS
+                    setopt NUMERIC_GLOB_SORT
+                    setopt NO_BEEP
 
-          HISTSIZE=100000
-          SAVEHIST=100000
-          HISTFILE="$HOME/.zsh_history"
+                    HISTSIZE=100000
+                    SAVEHIST=100000
+                    HISTFILE="$HOME/.zsh_history"
 
-          setopt HIST_IGNORE_ALL_DUPS
-          setopt INC_APPEND_HISTORY_TIME
-          setopt SHARE_HISTORY
-          setopt HIST_FCNTL_LOCK
-          setopt EXTENDED_HISTORY
+                    setopt HIST_IGNORE_ALL_DUPS
+                    setopt INC_APPEND_HISTORY_TIME
+                    setopt SHARE_HISTORY
+                    setopt HIST_FCNTL_LOCK
+                    setopt EXTENDED_HISTORY
 
-          export EDITOR="nvim"
-          export PAGER="less -R"
+                    export EDITOR="nvim"
+                    export PAGER="less -R"
+                    export OPENCODE_EXPERIMENTAL=true
+          					export OPENCODE_ENABLE_EXA=1
 
-          compdef ls=eza
+                     compdef ls=eza
 
-          zstyle ':fzf-tab:*' switch-group '<' '>'
+                    zstyle ':fzf-tab:*' switch-group '<' '>'
         '')
       ];
     };
@@ -74,7 +76,7 @@
       settings = {
         confirm_os_window_close = 0;
         disable_ligatures = "never";
-        allow_remote_control = "yes";
+        allow_remote_control = "socket-only";
         font_size = 11.0;
       };
       keybindings = {

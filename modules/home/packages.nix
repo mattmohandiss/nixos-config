@@ -3,7 +3,8 @@
 {
   home.packages = with pkgs; [
     fuzzel
-    zenity
+    wlogout
+    wayprompt
     wl-clipboard
     brightnessctl
     pwvucontrol
@@ -27,8 +28,6 @@
     zip
     unzip
     gnupg
-    pinentry-gtk2
-    fwupd
     nixpkgs-fmt
     statix
     godot
@@ -41,5 +40,13 @@
     zathura
     lazygit
     just
+
+    unityhub
+    android-tools
+    usbutils
+
+    glow
+
+    stremio-linux-shell
   ];
 }

@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, username, ... }:
 
 {
   hardware = {
@@ -13,6 +13,15 @@
 
   security.rtkit.enable = true;
 
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = true;
+    autoPrune.enable = true;
+    autoPrune.dates = "weekly";
+  };
+
+  users.users.${username}.extraGroups = [ "docker" ];
+
   services = {
     pipewire = {
       enable = true;
@@ -24,6 +33,8 @@
     };
 
     logind.settings.Login = {
+      HandlePowerKey = "ignore";
+      HandlePowerKeyLongPress = "poweroff";
       HandleLidSwitch = "suspend";
       HandleLidSwitchExternalPower = "ignore";
       HandleLidSwitchDocked = "ignore";

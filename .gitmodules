@@ -1,0 +1,6 @@
+[submodule "modules/home/dev/nvim"]
+	path = modules/home/dev/nvim
+	url = git@github.com:mattmohandiss/neovim-config.git
+[submodule "modules/home/dev/opencode"]
+	path = modules/home/dev/opencode
+	url = git@github.com:mattmohandiss/opencode-config.git

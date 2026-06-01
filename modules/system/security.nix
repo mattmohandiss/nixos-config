@@ -1,10 +1,7 @@
-{ pkgs, ... }:
+_:
 
 {
-  services.dbus = {
-    enable = true;
-    packages = [ pkgs.nautilus ];
-  };
+  services.dbus.enable = true;
 
   services.gnome.gnome-keyring.enable = true;
 
