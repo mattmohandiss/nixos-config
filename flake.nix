@@ -32,10 +32,6 @@
       flake = false;
     };
 
-    pawbar = {
-      url = "git+https://github.com/nekorg/pawbar.git";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
