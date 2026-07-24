@@ -12,8 +12,8 @@
       shellAliases = {
         ls = "eza -a --group-directories-first --icons";
         cat = "bat";
-        ask = "opencode run";
-        llm = "opencode";
+        ask = "opencode-sudo run";
+        llm = "opencode-sudo";
       };
 
       plugins = [

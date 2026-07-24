@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+exec "${OPENCODE_REAL_SUDO:?OPENCODE_REAL_SUDO is not set}" -A "$@"

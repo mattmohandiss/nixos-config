@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+real_sudo="$(command -v sudo)"
+real_opencode="$(command -v opencode)"
+askpass="$(command -v wayprompt-ssh-askpass)"
+
+export OPENCODE_REAL_SUDO="$real_sudo"
+export SUDO_ASKPASS="$askpass"
+export PATH="$script_dir/opencode-sudo-bin:$PATH"
+
+exec "$real_opencode" "$@"
