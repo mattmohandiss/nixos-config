@@ -77,6 +77,7 @@
         confirm_os_window_close = 0;
         disable_ligatures = "never";
         allow_remote_control = "socket-only";
+        auto_reload_config = -1;
         font_size = 11.0;
       };
       keybindings = {

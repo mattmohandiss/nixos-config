@@ -14,9 +14,6 @@ _:
         "hid"
       ];
       availableKernelModules = [
-        "xhci_pci"
-        "thunderbolt"
-        "nvme"
         "usbhid"
         "usb_storage"
         "sd_mod"
@@ -25,22 +22,8 @@ _:
         "i2c_hid"
         "pinctrl_tigerlake"
         "8250_dw"
-        "surface_gpe"
-        "surface_hotplug"
-        "surface_aggregator_registry"
-        "surface_aggregator_hub"
-        "surface_aggregator"
-        "surface_hid_core"
-        "surface_hid"
-        "surface_kbd"
       ];
     };
-    kernelModules = [
-      "surface_aggregator"
-      "surface_hid_core"
-      "surface_hid"
-      "surface_kbd"
-    ];
     crashDump.enable = true;
     kernelParams = [
       "mem_sleep_default=deep"

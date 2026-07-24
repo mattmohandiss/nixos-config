@@ -1,7 +1,7 @@
-{ inputs, ... }:
+{ config, ... }:
 
 {
   xdg.configFile."opencode" = {
-    source = "${inputs.self}/modules/home/dev/opencode";
+    source = config.lib.file.mkOutOfStoreSymlink "/etc/nixos/modules/home/dev/opencode";
   };
 }

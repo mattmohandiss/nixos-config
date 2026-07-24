@@ -8,19 +8,6 @@ let
   inherit (config.lib.niri) actions;
   selfScripts = "${inputs.self}/scripts";
   askpassBin = "${pkgs.wayprompt}/bin/wayprompt-ssh-askpass";
-  pawbarPkg = pkgs.buildGoModule {
-    pname = "pawbar";
-    version = "0-unstable";
-    src = inputs.pawbar.outPath;
-    subPackages = [ "." ];
-    vendorHash = "sha256-DUjfFrmpjSUWDicncTXvL1mnnPqEEKGyz6PTLEnGD7E=";
-    buildInputs = with pkgs; [
-      udev
-      librsvg
-      cairo
-    ];
-    nativeBuildInputs = with pkgs; [ pkg-config ];
-  };
 in
 {
   programs = {
@@ -36,13 +23,14 @@ in
         XDG_CURRENT_DESKTOP = "GNOME";
         XDG_SESSION_TYPE = "wayland";
         GIO_USE_VFS = "local";
-        DISPLAY = ":0";
         SUDO_ASKPASS = askpassBin;
         SSH_ASKPASS_REQUIRE = "force";
         TERMINAL = "kitty";
       };
 
-      spawn-at-startup = [ ];
+      spawn-at-startup = [
+        { command = [ "${pkgs.xwayland-satellite}/bin/xwayland-satellite" ]; }
+      ];
 
       animations.slowdown = 0.25;
 
@@ -179,75 +167,4 @@ in
     };
   };
 
-  systemd.user.services.pawbar = {
-    Unit = {
-      Description = "Pawbar panel";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pawbarPkg}/bin/pawbar";
-      Restart = "on-failure";
-      RestartSec = 5;
-      KillMode = "process";
-      TimeoutStopSec = 10;
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
-
-  xdg.configFile."wlogout/layout".text = builtins.toJSON [
-    {
-      label = "shutdown";
-      action = "systemctl poweroff";
-      text = "Shutdown";
-      keybind = "s";
-    }
-    {
-      label = "reboot";
-      action = "systemctl reboot";
-      text = "Restart";
-      keybind = "r";
-    }
-    {
-      label = "hibernate";
-      action = "systemctl hibernate";
-      text = "Hibernate";
-      keybind = "h";
-    }
-    {
-      label = "logout";
-      action = "niri msg action quit --skip-confirmation";
-      text = "Logout";
-      keybind = "l";
-    }
-  ];
-
-  xdg.configFile."wlogout/style.css".text = ''
-    * {
-      background-image: none;
-      box-shadow: none;
-      font-family: "Cantarell", sans-serif;
-      font-size: 18px;
-    }
-
-    window {
-      background-color: rgba(20, 24, 30, 0.8);
-    }
-
-    button {
-      color: #e8edf2;
-      background-color: #283341;
-      border: 2px solid #36485e;
-      border-radius: 12px;
-      margin: 12px;
-      padding: 20px 28px;
-      transition: background-color 120ms ease-in-out;
-    }
-
-    button:hover,
-    button:focus {
-      background-color: #3a4f68;
-      border-color: #8aa3c2;
-    }
-  '';
 }

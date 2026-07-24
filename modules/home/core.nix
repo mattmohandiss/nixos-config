@@ -1,4 +1,10 @@
-{ config, inputs, pkgs, username, homeDirectory, ... }:
+{ config
+, inputs
+, pkgs
+, username
+, homeDirectory
+, ...
+}:
 
 let
   homeScripts = "${inputs.self}/scripts";
@@ -8,7 +14,7 @@ in
 {
   programs.gpg.enable = true;
 
-  gtk.gtk4.theme = config.gtk.theme;
+  #gtk.gtk4.theme = config.gtk.theme;
 
   home = {
     inherit username homeDirectory;

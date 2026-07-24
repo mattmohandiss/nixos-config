@@ -1,8 +1,7 @@
-{
-  pkgs,
-  inputs,
-  username,
-  ...
+{ pkgs
+, inputs
+, username
+, ...
 }:
 
 {
@@ -24,6 +23,7 @@
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     WLR_NO_HARDWARE_CURSORS = "1";
+    LIBVA_DRIVER_NAME = "iHD";
   };
 
   xdg.portal = {
@@ -33,7 +33,7 @@
   };
 
   services.xserver.xkb = {
-    layout = "dk";
+    layout = "us";
     variant = "";
   };
 }

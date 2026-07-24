@@ -1,4 +1,4 @@
-{ config, lib, username, ... }:
+{ pkgs, ... }:
 
 {
   hardware = {
@@ -7,48 +7,15 @@
       powerOnBoot = true;
     };
 
+    graphics = {
+      enable = true;
+      extraPackages = with pkgs; [
+        intel-media-driver
+      ];
+    };
+
+    xpadneo.enable = true;
     sensor.iio.enable = true;
-    cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   };
 
-  security.rtkit.enable = true;
-
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = true;
-    autoPrune.enable = true;
-    autoPrune.dates = "weekly";
-  };
-
-  users.users.${username}.extraGroups = [ "docker" ];
-
-  services = {
-    pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      jack.enable = true;
-      wireplumber.enable = true;
-    };
-
-    logind.settings.Login = {
-      HandlePowerKey = "ignore";
-      HandlePowerKeyLongPress = "poweroff";
-      HandleLidSwitch = "suspend";
-      HandleLidSwitchExternalPower = "ignore";
-      HandleLidSwitchDocked = "ignore";
-    };
-
-    upower = {
-      enable = true;
-      percentageLow = 20;
-      percentageCritical = 5;
-      percentageAction = 3;
-      criticalPowerAction = "Hibernate";
-    };
-
-    iptsd.enable = true;
-    fwupd.enable = true;
-  };
 }

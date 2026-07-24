@@ -1,8 +1,9 @@
-{ inputs, ... }:
+_:
 
 {
   imports = [
     ./hardware-configuration.nix
+    ./surface.nix
     ../../modules/system
     ../../modules/home
   ];
