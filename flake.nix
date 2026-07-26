@@ -27,6 +27,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     cascadefox = {
       url = "github:cascadefox/cascade";
       flake = false;
@@ -46,6 +51,7 @@
 
         modules = [
           inputs.stylix.nixosModules.stylix
+          inputs.nixos-hardware.nixosModules.microsoft-surface-pro-intel
           ./hosts/surface
         ];
 

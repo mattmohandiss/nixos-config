@@ -15,6 +15,22 @@
   users.users.${username}.extraGroups = [ "docker" ];
 
   services = {
+    searx = {
+      enable = true;
+      redisCreateLocally = true;
+      environmentFile = "/etc/searxng/secret.env";
+
+      settings = {
+        search.formats = [ "html" "json" ];
+
+        server = {
+          bind_address = "127.0.0.1";
+          port = 8080;
+          secret_key = "$SEARXNG_SECRET";
+        };
+      };
+    };
+
     power-profiles-daemon.enable = true;
     thermald.enable = true;
 

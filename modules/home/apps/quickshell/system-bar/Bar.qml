@@ -96,7 +96,7 @@ PanelWindow {
             anchors.centerIn: parent
             color: root.theme.foreground
             font.family: root.theme.fontFamily
-            font.pixelSize: 13
+            font.pointSize: root.theme.fontPointSize
             text: Qt.formatDateTime(clock.date, "HH:mm:ss")
         }
 
@@ -106,7 +106,7 @@ PanelWindow {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
 
-            Metric { icon: root.wifiIcon(root.metrics.wifiSignal); value: root.metrics.wifi; status: root.metrics.wifi === "offline" ? "critical" : "normal"; theme: root.theme }
+            Metric { icon: root.wifiIcon(root.metrics.wifiSignal); value: root.metrics.wifi; valueWidth: 112; status: root.metrics.wifi === "offline" ? "critical" : "normal"; theme: root.theme }
             Metric { icon: root.volumeIcon(root.metrics.volume, root.metrics.volumeMuted); value: root.metrics.volume + "%"; status: root.metrics.volumeMuted ? "muted" : "normal"; theme: root.theme }
             Metric { icon: root.backlightIcon(root.metrics.backlight); value: root.metrics.backlight + "%"; theme: root.theme }
             Metric { icon: root.batteryIcon(root.metrics.battery, root.metrics.batteryState); value: root.metrics.battery + "%"; status: root.lowStatus(root.metrics.battery, 30, 15); theme: root.theme }

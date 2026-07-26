@@ -31,6 +31,7 @@
           readonly property color error: "#${config.lib.stylix.colors.base08}"
           readonly property color warning: "#${config.lib.stylix.colors.base0A}"
           readonly property string fontFamily: "${config.stylix.fonts.monospace.name}"
+          readonly property real fontPointSize: ${toString config.stylix.fonts.sizes.desktop}
       }
     '';
 
@@ -65,8 +66,8 @@
       * {
         background-image: none;
         box-shadow: none;
-        font-family: "Cantarell", sans-serif;
-        font-size: 18px;
+        font-family: "${config.stylix.fonts.monospace.name}";
+        font-size: ${toString config.stylix.fonts.sizes.popups}pt;
       }
 
       window {

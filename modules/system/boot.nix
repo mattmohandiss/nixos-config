@@ -35,6 +35,7 @@ _:
       "loglevel=4"
       "i915.enable_psr=0"
       "nvme_core.default_ps_max_latency_us=0"
+      "intremap=nosid"
     ];
   };
 

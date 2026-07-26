@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  programs.fuse.enable = true;
+
   environment.systemPackages = with pkgs; [
     ffmpeg
     nil
@@ -11,6 +13,7 @@
     strace
     gdb
     binutils
+    fuse3
     surface-control
   ];
 
