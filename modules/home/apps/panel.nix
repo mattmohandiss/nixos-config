@@ -1,7 +1,43 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
+
+let
+  wvkbdAuto = pkgs.wvkbd.overrideAttrs (_: {
+    version = "0.20";
+    src = pkgs.fetchgit {
+      url = "https://git.sr.ht/~proycon/wvkbd";
+      rev = "106accf7724feb7617d95f65e75ab689acb3a1de";
+      hash = "sha256-sQC+AK4k7XidmJUVEPAKKcrhfPkFAa+ZCbZUsBrJUoc=";
+    };
+  });
+
+  wvkbdTablet = pkgs.writeShellScriptBin "wvkbd-tablet" ''
+    exec ${wvkbdAuto}/bin/wvkbd-mobintl \
+      -H 360 \
+      -L 280 \
+      -R 14 \
+      --fn "${config.stylix.fonts.monospace.name} 14" \
+      --alpha 255 \
+      --bg "${config.lib.stylix.colors.base00}" \
+      --fg "${config.lib.stylix.colors.base02}" \
+      --fg-sp "${config.lib.stylix.colors.base01}" \
+      --press "${config.lib.stylix.colors.base0D}" \
+      --press-sp "${config.lib.stylix.colors.base0A}" \
+      --swipe "${config.lib.stylix.colors.base0C}" \
+      --swipe-sp "${config.lib.stylix.colors.base0A}" \
+      --text "${config.lib.stylix.colors.base05}" \
+      --text-sp "${config.lib.stylix.colors.base05}" \
+      -l full,special,nav \
+      --landscape-layers landscape,landscapespecial,nav
+  '';
+in
 
 {
-  home.packages = [ pkgs.quickshell ];
+  home.file = {
+    ".local/bin/tablet-mode-menu".source = "${inputs.self}/scripts/tablet-mode-menu";
+    ".local/bin/rotate-screen".source = "${inputs.self}/scripts/rotate-screen";
+  };
+
+  home.packages = [ pkgs.quickshell wvkbdTablet ];
 
   systemd.user.services.quickshell-pawbar = {
     Unit = {
@@ -22,12 +58,17 @@
     "quickshell/system-bar/Bar.qml".source = ./quickshell/system-bar/Bar.qml;
     "quickshell/system-bar/Metrics.qml".source = ./quickshell/system-bar/Metrics.qml;
     "quickshell/system-bar/Metric.qml".source = ./quickshell/system-bar/Metric.qml;
+    "quickshell/system-bar/QuickSettings.qml".source = ./quickshell/system-bar/QuickSettings.qml;
     "quickshell/system-bar/Theme.qml".text = ''
       import QtQuick
 
       QtObject {
           readonly property color background: "#${config.lib.stylix.colors.base00}"
+          readonly property color surface: "#${config.lib.stylix.colors.base01}"
+          readonly property color surfaceRaised: "#${config.lib.stylix.colors.base02}"
+          readonly property color muted: "#${config.lib.stylix.colors.base03}"
           readonly property color foreground: "#${config.lib.stylix.colors.base05}"
+          readonly property color accent: "#${config.lib.stylix.colors.base0D}"
           readonly property color error: "#${config.lib.stylix.colors.base08}"
           readonly property color warning: "#${config.lib.stylix.colors.base0A}"
           readonly property string fontFamily: "${config.stylix.fonts.monospace.name}"

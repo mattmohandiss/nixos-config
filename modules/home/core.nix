@@ -19,8 +19,14 @@ in
   home = {
     inherit username homeDirectory;
     stateVersion = "25.05";
-    sessionVariables.STYLIX_MONOSPACE_FONT = config.stylix.fonts.monospace.name;
+    sessionVariables = {
+      STYLIX_MONOSPACE_FONT = config.stylix.fonts.monospace.name;
+      OPENCODE_ENABLE_EXA = "1";
+      OPENCODE_EXPERIMENTAL = "true";
+      OPENCODE_EXPERIMENTAL_LSP_TOOL = "true";
+    };
     sessionPath = [
+      "$HOME/.local/bin"
       homeScripts
       "$HOME/.bun/bin"
     ];

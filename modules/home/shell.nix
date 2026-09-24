@@ -32,6 +32,10 @@
           zstyle ':completion:*' squeeze-slashes true
         '')
         (lib.mkOrder 550 ''
+                    if [ -f "$HOME/.config/lean-ctx/shell-hook.zsh" ]; then
+                      source "$HOME/.config/lean-ctx/shell-hook.zsh"
+                    fi
+
                     setopt AUTO_CD
                     setopt AUTO_PUSHD
                     setopt PUSHD_IGNORE_DUPS

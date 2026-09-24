@@ -9,7 +9,7 @@
 
   programs.niri = {
     enable = true;
-    package = pkgs.niri-unstable;
+    package = pkgs.niri;
   };
 
   services.greetd = {
@@ -33,7 +33,7 @@
   };
 
   services.xserver.xkb = {
-    layout = "us";
+    layout = "dk,us";
     variant = "";
   };
 }

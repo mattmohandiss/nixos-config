@@ -18,8 +18,18 @@ in
 
       input.power-key-handling.enable = true;
 
+      switch-events = {
+        tablet-mode-on.action.spawn = [ "${selfScripts}/tablet-mode-menu" "--on" ];
+        tablet-mode-off.action.spawn = [ "${selfScripts}/tablet-mode-menu" "--off" ];
+      };
+
+      input.keyboard.xkb = {
+        layout = "dk,us";
+      };
+
       environment = {
         NIXOS_OZONE_WL = "1";
+        DISPLAY = ":0";
         XDG_CURRENT_DESKTOP = "GNOME";
         XDG_SESSION_TYPE = "wayland";
         GIO_USE_VFS = "local";
@@ -58,7 +68,13 @@ in
         ];
       };
 
-      window-rules = [{ draw-border-with-background = false; }];
+      window-rules = [
+        { draw-border-with-background = false; }
+        {
+          matches = [{ app-id = "^love$"; }];
+          open-floating = true;
+        }
+      ];
 
       binds = {
         "Mod+d".action = actions.spawn [

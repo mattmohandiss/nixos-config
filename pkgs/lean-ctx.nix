@@ -2,11 +2,11 @@
 
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "lean-ctx";
-  version = "3.9.3";
+  version = "3.10.1";
 
   src = fetchurl {
     url = "https://github.com/yvgude/lean-ctx/releases/download/v${finalAttrs.version}/lean-ctx-x86_64-unknown-linux-musl.tar.gz";
-    hash = "sha256-a0QPBtQj2d0Unanh0KcK90q3PRMAoFHpC+NPMSMPqP4=";
+    hash = "sha256-Gu6Zz5tujqGCm0/iHSpRxpEgi/GP9NWMjQ15godZRgA=";
   };
 
   sourceRoot = ".";

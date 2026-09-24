@@ -13,6 +13,7 @@
     strace
     gdb
     binutils
+    fuse.out
     fuse3
     surface-control
   ];

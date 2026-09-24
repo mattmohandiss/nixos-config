@@ -8,7 +8,6 @@
     poppler-utils
     tesseract
     zathura
-    stremio-linux-shell
     freecad
   ];
 }

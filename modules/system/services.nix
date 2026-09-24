@@ -1,6 +1,16 @@
-{ username, ... }:
+{ config, username, ... }:
 
 {
+  sops.secrets.searx-secret = {
+    sopsFile = ../../secrets/surface.yaml;
+    owner = "root";
+    mode = "0400";
+  };
+
+  sops.templates."searxng-secret.env".content = ''
+    SEARXNG_SECRET=${config.sops.placeholder.searx-secret}
+  '';
+
   security.rtkit.enable = true;
 
   powerManagement.enable = true;
@@ -15,10 +25,12 @@
   users.users.${username}.extraGroups = [ "docker" ];
 
   services = {
+    ollama.enable = true;
+
     searx = {
       enable = true;
       redisCreateLocally = true;
-      environmentFile = "/etc/searxng/secret.env";
+      environmentFile = config.sops.templates."searxng-secret.env".path;
 
       settings = {
         search.formats = [ "html" "json" ];

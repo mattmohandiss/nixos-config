@@ -1,6 +1,8 @@
 _:
 
 {
+  sops.age.keyFile = "/home/mattm/.config/sops/age/keys.txt";
+
   services.gnome.gnome-keyring.enable = true;
 
   programs = {
